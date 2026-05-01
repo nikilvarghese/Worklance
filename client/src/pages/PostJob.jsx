@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { PaperAirplaneIcon } from "@heroicons/react/24/outline";
+import { PaperAirplaneIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import axios from "../utils/axios";
+import { useEffect } from "react";
 import { useToast } from "../components/Toast";
 import { jobCategories } from "../data/categories";
 
@@ -32,6 +33,32 @@ export default function PostJob() {
   const navigate = useNavigate();
   const [form, setForm] = useState(initialForm);
   const [loading, setLoading] = useState(false);
+  const [hrProfile, setHrProfile] = useState(null);
+  const [showIncompleteModal, setShowIncompleteModal] = useState(false);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await axios.get("/auth/me");
+        setHrProfile(res.data);
+      } catch (err) {
+        console.error("Could not fetch HR profile", err);
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  const isHRProfileComplete = Boolean(
+    hrProfile?.company &&
+    hrProfile?.about &&
+    hrProfile?.location &&
+    hrProfile?.email
+  );
+
+  const handleNavigateToHRProfile = () => {
+    setShowIncompleteModal(false);
+    navigate("/hr-profile");
+  };
 
   const update = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -130,13 +157,48 @@ export default function PostJob() {
               </div>
             </Section>
 
-            <button type="submit" disabled={loading} className="btn-primary w-full">
+            <button
+              type={isHRProfileComplete ? "submit" : "button"}
+              onClick={(e) => {
+                if (!isHRProfileComplete) {
+                  e.preventDefault();
+                  setShowIncompleteModal(true);
+                }
+              }}
+              disabled={loading}
+              className="btn-primary w-full"
+              title={!isHRProfileComplete ? "Complete your profile to post jobs" : ""}
+            >
               <PaperAirplaneIcon className="h-4 w-4" />
               {loading ? "Publishing..." : "Publish job"}
             </button>
           </aside>
         </div>
       </form>
+
+      {showIncompleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4">
+          <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-amber-100">
+                <ExclamationTriangleIcon className="h-5 w-5 text-amber-600" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-950">Incomplete Profile</h3>
+            </div>
+            <p className="text-sm leading-6 text-slate-600">
+              Complete your company profile before posting jobs. A complete profile builds trust and attracts better candidates.
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button type="button" onClick={() => setShowIncompleteModal(false)} className="btn-secondary">
+                Cancel
+              </button>
+              <button type="button" onClick={handleNavigateToHRProfile} className="btn-primary bg-amber-500 hover:bg-amber-600 border-transparent text-white">
+                Complete Profile
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

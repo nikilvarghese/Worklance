@@ -12,6 +12,7 @@ import {
 import axios from "../utils/axios";
 import { useToast } from "../components/Toast";
 import { formatDate, formatSalary } from "../utils/format";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 
 export default function JobDetails() {
   const { id } = useParams();
@@ -28,6 +29,8 @@ export default function JobDetails() {
     expectedSalary: "",
     availability: "Immediately",
   });
+  const [userProfile, setUserProfile] = useState(null);
+  const [showIncompleteModal, setShowIncompleteModal] = useState(false);
 
   const applied = useMemo(
     () => applications.some((item) => (item.jobId?._id || item.jobId) === id),
@@ -43,9 +46,9 @@ export default function JobDetails() {
     try {
       const requests = [axios.get(`/jobs/${id}`)];
       if (role === "user") {
-        requests.push(axios.get("/applications"), axios.get("/saved"));
+        requests.push(axios.get("/applications"), axios.get("/saved"), axios.get("/auth/profile"));
       }
-      const [jobRes, appRes, savedRes] = await Promise.all(requests);
+      const [jobRes, appRes, savedRes, profileRes] = await Promise.all(requests);
       setJob(jobRes.data);
       setApplicationForm((prev) => ({
         ...prev,
@@ -54,6 +57,7 @@ export default function JobDetails() {
       }));
       setApplications(appRes?.data || []);
       setSavedJobs(savedRes?.data || []);
+      setUserProfile(profileRes?.data || null);
     } catch (err) {
       addToast("Could not load job details", "error");
     } finally {
@@ -64,6 +68,18 @@ export default function JobDetails() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  const isProfileComplete = Boolean(
+    userProfile?.name &&
+    userProfile?.email &&
+    userProfile?.resume &&
+    userProfile?.skills?.length > 0
+  );
+
+  const handleNavigateToProfile = () => {
+    setShowIncompleteModal(false);
+    navigate("/profile");
+  };
 
   const submitApplication = async (e) => {
     e.preventDefault();
@@ -153,7 +169,17 @@ export default function JobDetails() {
                   <BookmarkIcon className="h-4 w-4" />
                   {saved ? "Saved" : "Save job"}
                 </button>
-                <a href="#apply" className={applied ? "btn-secondary border-emerald-200 bg-emerald-50 text-emerald-700" : "btn-primary"}>
+                <a
+                  href={isProfileComplete ? "#apply" : undefined}
+                  onClick={(e) => {
+                    if (!isProfileComplete) {
+                      e.preventDefault();
+                      setShowIncompleteModal(true);
+                    }
+                  }}
+                  className={applied ? "btn-secondary border-emerald-200 bg-emerald-50 text-emerald-700" : "btn-primary"}
+                  title={!isProfileComplete ? "Profile incomplete" : ""}
+                >
                   <CheckCircleIcon className="h-4 w-4" />
                   {applied ? "Applied" : "Apply now"}
                 </a>
@@ -269,6 +295,30 @@ export default function JobDetails() {
           </aside>
         </div>
       </section>
+
+      {showIncompleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4">
+          <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-amber-100">
+                <ExclamationTriangleIcon className="h-5 w-5 text-amber-600" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-950">Profile Incomplete</h3>
+            </div>
+            <p className="text-sm leading-6 text-slate-600">
+              Complete your profile to apply for jobs. Add your details to increase your chances of getting hired.
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button type="button" onClick={() => setShowIncompleteModal(false)} className="btn-secondary">
+                Cancel
+              </button>
+              <button type="button" onClick={handleNavigateToProfile} className="btn-primary bg-amber-500 hover:bg-amber-600 border-transparent text-white">
+                Complete Profile
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
