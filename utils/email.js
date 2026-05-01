@@ -30,7 +30,7 @@ const sendOtpEmail = async ({ email, otp, subject, label }) => {
   }
 
   await transporter.sendMail({
-    from: process.env.EMAIL_FROM || "no-reply@worklance.com",
+    from: `"Worklance" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
     to: email,
     subject,
     text,

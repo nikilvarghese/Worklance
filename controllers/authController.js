@@ -6,7 +6,7 @@ const Hr = require("../models/Hr");
 const Otp = require("../models/Otp");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { sendOtpEmail } = require("../utils/sendEmail");
+const { sendOtpEmail } = require("../utils/email");
 const { getGoogleAuthUrl, getGoogleUser } = require("../utils/google");
 
 const createToken = (id, role) => {

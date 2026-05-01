@@ -1,5 +1,5 @@
 import Otp from "../models/Otp.js";
-import { sendOTPEmail } from "../utils/sendEmail.js";
+import { sendOTPEmail } from "../utils/email.js";
 
 router.post("/verify-otp", async (req, res) => {
   const { email, otp } = req.body;
