@@ -50,7 +50,7 @@ export default function Register() {
     setLoadingSend(true);
 
     try {
-      const response = await axios.post("/auth/otp/request-register", {
+      const response = await axios.post("/auth/send-otp", {
         ...form,
         name: `${form.firstName} ${form.lastName}`.trim(),
       });
