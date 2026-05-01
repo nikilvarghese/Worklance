@@ -70,7 +70,9 @@ export default function HRLogin() {
         <div className="mt-4 flex justify-center">
           <button
             type="button"
-            onClick={() => window.location.href = "http://localhost:5000/api/auth/google?role=hr&action=login"}
+            onClick={() =>
+  window.location.href = `${process.env.REACT_APP_API_URL}/auth/google?role=hr&action=login`
+}
             className="inline-flex h-14 w-14 items-center justify-center rounded-full border border-slate-200 bg-white shadow-sm transition hover:shadow-md"
             aria-label="Continue with Google"
           >
