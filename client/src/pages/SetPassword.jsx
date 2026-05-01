@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { KeyIcon } from "@heroicons/react/24/outline";
 import axios from "../utils/axios";
 import { AuthFrame } from "./UserLogin";
+import PasswordInput from "../components/PasswordInput";
 
 export default function SetPassword() {
   const [form, setForm] = useState({ password: "", confirmPassword: "" });
@@ -35,16 +36,16 @@ export default function SetPassword() {
     setError("");
 
     try {
-      // Send the token in Authorization header manually since it's not in localStorage yet
-      const res = await axios.post(
-        "/auth/set-password",
-        { password: form.password },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+
+      await axios.post(
+  "/auth/set-password",
+  { password: form.password },
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+);
 
       // Successfully set password, now we can log them in properly
       localStorage.clear();
@@ -73,22 +74,19 @@ export default function SetPassword() {
             {error}
           </div>
         )}
-        <input
-          type="password"
-          placeholder="New Password"
-          className="input"
-          value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Confirm Password"
-          className="input"
-          value={form.confirmPassword}
-          onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
-          required
-        />
+        <PasswordInput
+  value={form.password}
+  onChange={(e) => setForm({ ...form, password: e.target.value })}
+  placeholder="New Password"
+  required
+/>
+
+<PasswordInput
+  value={form.confirmPassword}
+  onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
+  placeholder="Confirm Password"
+  required
+/>
         <button type="submit" disabled={loading} className="btn-primary w-full">
           <KeyIcon className="h-4 w-4" />
           {loading ? "Saving..." : "Set Password"}

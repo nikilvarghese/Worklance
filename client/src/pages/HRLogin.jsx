@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { BuildingOffice2Icon, LockClosedIcon } from "@heroicons/react/24/outline";
 import axios from "../utils/axios";
 import { AuthFrame } from "./UserLogin";
+import PasswordInput from "../components/PasswordInput";
 
 export default function HRLogin() {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -51,14 +52,11 @@ export default function HRLogin() {
           onChange={(e) => setForm({ ...form, email: e.target.value })}
           required
         />
-        <input
-          type="password"
-          placeholder="Password"
-          className="input"
-          value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-          required
-        />
+        <PasswordInput
+  value={form.password}
+  onChange={(e) => setForm({ ...form, password: e.target.value })}
+  placeholder="Password"
+/>
         <button type="submit" disabled={loading} className="btn-primary w-full bg-teal-600 hover:bg-teal-700">
           <LockClosedIcon className="h-4 w-4" />
           {loading ? "Signing in..." : "Sign in as employer"}

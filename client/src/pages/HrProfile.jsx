@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { BuildingOffice2Icon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import axios from "../utils/axios";
 import { useToast } from "../components/Toast";
@@ -16,7 +15,7 @@ export default function HrProfile() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [changePasswordModalOpen, setChangePasswordModalOpen] = useState(false);
-
+const [errors, setErrors] = useState({});
   const loadProfile = useCallback(async () => {
     try {
       const res = await axios.get("/auth/me");
@@ -52,8 +51,31 @@ export default function HrProfile() {
     setDeleteModalOpen(false);
   };
 
+  const validateForm = () => {
+  const newErrors = {};
+
+  // 📞 Phone validation
+  if (form.phone) {
+    if (!/^\d{10}$/.test(form.phone)) {
+      newErrors.phone = "Phone must be exactly 10 digits";
+    }
+  }
+
+  // 🌐 Website validation
+  if (form.website) {
+    const urlPattern = /^(https?:\/\/)[^\s$.?#].[^\s]*$/;
+    if (!urlPattern.test(form.website)) {
+      newErrors.website = "Enter a valid website link (https://...)";
+    }
+  }
+
+  setErrors(newErrors);
+  return Object.keys(newErrors).length === 0;
+};
+
   const saveProfile = async (e) => {
     e.preventDefault();
+    if (!validateForm()) return; //
     setSaving(true);
     try {
       const res = await axios.put("/auth/me", form);
@@ -102,14 +124,41 @@ export default function HrProfile() {
             <BuildingOffice2Icon className="h-8 w-8 text-indigo-600" />
             <div className="mt-5 space-y-4">
               <Info label="Email" value={profile.email} />
-              <Info label="Phone" value={profile.phone || "Not added"} />
+              <input
+  type="tel"
+  className="input"
+  value={form.phone || ""}
+  onChange={(e) => {
+    const value = e.target.value.replace(/\D/g, ""); // remove non-digits
+    if (value.length <= 10) {
+      setForm({ ...form, phone: value });
+    }
+  }}
+  maxLength={10}
+  placeholder="10-digit phone number"
+  required
+/>
               <Info label="Location" value={profile.location || "Not added"} />
-              <Info label="Website" value={profile.website || "Not added"} />
+              <input
+  type="url"
+  className="input"
+  value={form.website || ""}
+  onChange={(e) => setForm({ ...form, website: e.target.value })}
+  placeholder="https://example.com"
+  pattern="https?://.*"
+/>
             </div>
           </aside>
           <div className="space-y-5 p-6">
             <Info label="Industry" value={profile.industry || "Not added"} />
-            <Info label="Team size" value={profile.teamSize || "Not added"} />
+            <input
+  type="number"
+  className="input"
+  value={form.teamSize || ""}
+  onChange={(e) => setForm({ ...form, teamSize: e.target.value })}
+  min={1}
+  placeholder="e.g. 50"
+/>
             <div className="rounded-lg border border-slate-100 bg-white p-4">
               <p className="label">About</p>
               <p className="mt-2 text-sm leading-7 text-slate-600">{profile.about || "Add a company description to help candidates understand your team."}</p>
@@ -142,11 +191,47 @@ export default function HrProfile() {
               <Field label="Name"><input className="input" value={form.name || ""} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></Field>
               <Field label="Company"><input className="input" value={form.company || ""} onChange={(e) => setForm({ ...form, company: e.target.value })} /></Field>
               <Field label="Designation"><input className="input" value={form.designation || ""} onChange={(e) => setForm({ ...form, designation: e.target.value })} /></Field>
-              <Field label="Phone"><input className="input" value={form.phone || ""} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></Field>
-              <Field label="Website"><input className="input" value={form.website || ""} onChange={(e) => setForm({ ...form, website: e.target.value })} /></Field>
+             <Field label="Phone">
+  <input
+    type="tel"
+    className="input"
+    value={form.phone || ""}
+    onChange={(e) => {
+      const value = e.target.value.replace(/\D/g, "");
+      if (value.length <= 10) {
+        setForm({ ...form, phone: value });
+      }
+    }}
+    placeholder="10-digit phone number"
+  />
+  {errors.phone && (
+    <p className="text-sm text-rose-600 mt-1">{errors.phone}</p>
+  )}
+</Field>
+              <Field label="Website">
+  <input
+    type="text"
+    className="input"
+    value={form.website || ""}
+    onChange={(e) => setForm({ ...form, website: e.target.value })}
+    placeholder="https://example.com"
+  />
+  {errors.website && (
+    <p className="text-sm text-rose-600 mt-1">{errors.website}</p>
+  )}
+</Field>
               <Field label="Location"><input className="input" value={form.location || ""} onChange={(e) => setForm({ ...form, location: e.target.value })} /></Field>
               <Field label="Industry"><input className="input" value={form.industry || ""} onChange={(e) => setForm({ ...form, industry: e.target.value })} /></Field>
-              <Field label="Team size"><input className="input" value={form.teamSize || ""} onChange={(e) => setForm({ ...form, teamSize: e.target.value })} /></Field>
+              <Field label="Team size">
+  <input
+    type="number"
+    className="input"
+    value={form.teamSize || ""}
+    onChange={(e) => setForm({ ...form, teamSize: e.target.value })}
+    min={1}
+    placeholder="e.g. 50"
+  />
+</Field>
             </div>
             <Field label="About"><textarea className="input mt-1 min-h-32" value={form.about || ""} onChange={(e) => setForm({ ...form, about: e.target.value })} /></Field>
 

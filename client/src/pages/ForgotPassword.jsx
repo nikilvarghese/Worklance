@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { LockClosedIcon } from "@heroicons/react/24/outline";
 import axios from "../utils/axios";
 import { AuthFrame } from "./UserLogin";
+import PasswordInput from "../components/PasswordInput";
 
 export default function ForgotPassword() {
   const [form, setForm] = useState({ email: "", otp: "", password: "" });
@@ -138,14 +139,12 @@ export default function ForgotPassword() {
               onChange={handleOtpChange}
               required
             />
-            <input
-              type="password"
-              placeholder="New password"
-              className="input"
-              value={form.password}
-              onChange={handlePasswordChange}
-              required
-            />
+            <PasswordInput
+  value={form.password}
+  onChange={handlePasswordChange}
+  placeholder="New password"
+  required
+/>
             {passwordError && (
               <p className="text-sm text-rose-600 mt-1">{passwordError}</p>
             )}

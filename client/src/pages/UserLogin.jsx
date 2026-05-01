@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { BriefcaseIcon, LockClosedIcon } from "@heroicons/react/24/outline";
 import axios from "../utils/axios";
+import PasswordInput from "../components/PasswordInput";
 
 export default function UserLogin() {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -50,14 +51,11 @@ export default function UserLogin() {
           onChange={(e) => setForm({ ...form, email: e.target.value })}
           required
         />
-        <input
-          type="password"
-          placeholder="Password"
-          className="input"
-          value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-          required
-        />
+        <PasswordInput
+  value={form.password}
+  onChange={(e) => setForm({ ...form, password: e.target.value })}
+  placeholder="Password"
+/>
         <button type="submit" disabled={loading} className="btn-primary w-full">
           <LockClosedIcon className="h-4 w-4" />
           {loading ? "Signing in..." : "Sign in as job seeker"}

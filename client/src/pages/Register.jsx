@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { UserPlusIcon } from "@heroicons/react/24/outline";
 import axios from "../utils/axios";
 import { AuthFrame } from "./UserLogin";
+import PasswordInput from "../components/PasswordInput";
 
 const validateEmail = (email) => /^\S+@\S+\.\S+$/.test(email);
 
@@ -230,14 +231,11 @@ export default function Register() {
         <div className={`grid gap-4 ${form.role === "hr" ? "grid-cols-2" : "grid-cols-1"}`}>
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-slate-700">Password</label>
-            <input
-              placeholder="••••••••"
-              type="password"
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition-all placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10"
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-              required
-            />
+            <PasswordInput
+  value={form.password}
+  onChange={(e) => setForm({ ...form, password: e.target.value })}
+  placeholder="••••••••"
+/>
           </div>
           {form.role === "hr" && (
             <div className="space-y-1.5">

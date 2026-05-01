@@ -3,6 +3,7 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 import axios from "../utils/axios";
 import { useToast } from "./Toast";
+import PasswordInput from "../components/PasswordInput";
 
 export default function ChangePasswordModal({ isOpen, onClose }) {
   const { addToast } = useToast();
@@ -17,20 +18,32 @@ export default function ChangePasswordModal({ isOpen, onClose }) {
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
+
     if (!data.oldPassword || !data.newPassword) return;
+
     if (data.newPassword !== data.confirmPassword) {
       addToast("New passwords do not match", "error");
       return;
     }
-    
+
     setChanging(true);
+
     try {
       await axios.put("/auth/change-password", data);
       addToast("Password changed successfully", "success");
-      setData({ oldPassword: "", newPassword: "", confirmPassword: "" });
+
+      setData({
+        oldPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+
       onClose();
     } catch (err) {
-      addToast(err.response?.data?.message || "Could not change password", "error");
+      addToast(
+        err.response?.data?.message || "Could not change password",
+        "error"
+      );
     } finally {
       setChanging(false);
     }
@@ -38,7 +51,9 @@ export default function ChangePasswordModal({ isOpen, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4">
-      <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl relative">
+      <div className="relative w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
+        
+        {/* Close Button */}
         <button
           type="button"
           onClick={onClose}
@@ -46,40 +61,63 @@ export default function ChangePasswordModal({ isOpen, onClose }) {
         >
           <XMarkIcon className="h-5 w-5" />
         </button>
-        <h3 className="text-xl font-bold text-slate-950 mb-4">Change Password</h3>
-        
+
+        {/* Title */}
+        <h3 className="mb-4 text-xl font-bold text-slate-950">
+          Change Password
+        </h3>
+
+        {/* Form */}
         <form onSubmit={handleChangePassword} className="space-y-4">
+
+          {/* Old Password */}
           <label className="block">
             <span className="label mb-1 block">Old Password</span>
-            <input
-              type="password"
-              className="input w-full"
+            <PasswordInput
               value={data.oldPassword}
-              onChange={(e) => setData({ ...data, oldPassword: e.target.value })}
-              required
-            />
-          </label>
-          <label className="block">
-            <span className="label mb-1 block">New Password</span>
-            <input
-              type="password"
-              className="input w-full"
-              value={data.newPassword}
-              onChange={(e) => setData({ ...data, newPassword: e.target.value })}
-              required
-            />
-          </label>
-          <label className="block">
-            <span className="label mb-1 block">Confirm New Password</span>
-            <input
-              type="password"
-              className="input w-full"
-              value={data.confirmPassword}
-              onChange={(e) => setData({ ...data, confirmPassword: e.target.value })}
+              onChange={(e) =>
+                setData({ ...data, oldPassword: e.target.value })
+              }
+              placeholder="Old Password"
               required
             />
           </label>
 
+          {/* New Password */}
+          <label className="block">
+            <span className="label mb-1 block">New Password</span>
+            <PasswordInput
+              value={data.newPassword}
+              onChange={(e) =>
+                setData({ ...data, newPassword: e.target.value })
+              }
+              placeholder="New Password"
+              required
+            />
+          </label>
+
+          {/* Confirm Password */}
+          <label className="block">
+            <span className="label mb-1 block">Confirm New Password</span>
+            <PasswordInput
+              value={data.confirmPassword}
+              onChange={(e) =>
+                setData({ ...data, confirmPassword: e.target.value })
+              }
+              placeholder="Confirm Password"
+              required
+            />
+          </label>
+
+          {/* Mismatch Warning */}
+          {data.confirmPassword &&
+            data.newPassword !== data.confirmPassword && (
+              <p className="text-sm text-rose-600">
+                Passwords do not match
+              </p>
+            )}
+
+          {/* Footer */}
           <div className="mt-6 flex items-center justify-between">
             <Link
               to="/forgot-password"
@@ -89,6 +127,7 @@ export default function ChangePasswordModal({ isOpen, onClose }) {
             >
               Forgot old password?
             </Link>
+
             <div className="flex gap-3">
               <button
                 type="button"
@@ -97,15 +136,22 @@ export default function ChangePasswordModal({ isOpen, onClose }) {
               >
                 Cancel
               </button>
+
               <button
                 type="submit"
-                disabled={changing || !data.oldPassword || !data.newPassword || data.newPassword !== data.confirmPassword}
+                disabled={
+                  changing ||
+                  !data.oldPassword ||
+                  !data.newPassword ||
+                  data.newPassword !== data.confirmPassword
+                }
                 className="btn-primary"
               >
                 {changing ? "Changing..." : "Reset Password"}
               </button>
             </div>
           </div>
+
         </form>
       </div>
     </div>
