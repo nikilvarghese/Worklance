@@ -6,7 +6,7 @@ const Hr = require("../models/Hr");
 const Otp = require("../models/Otp");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { sendOtpEmail } = require("../utils/email");
+const { sendOTPEmail } = require("../utils/email");
 const { getGoogleAuthUrl, getGoogleUser } = require("../utils/google");
 
 const createToken = (id, role) => {
@@ -97,13 +97,8 @@ const createOtpRecord = async ({ email, type, role, payload }) => {
   return { otp, otpDoc };
 };
 
-const sendOtp = async ({ email, otp, purpose }) => {
-  await sendOtpEmail({
-    email,
-    otp,
-    subject: `${purpose} verification code`,
-    label: purpose,
-  });
+const sendOTP = async ({ email, otp, purpose }) => {
+  await sendOTPEmail(email, otp);
 };
 
 const verifyOtpCode = async (otpDoc, otp) => {
@@ -271,7 +266,7 @@ const requestRegisterOtp = async (req, res) => {
       payload,
     });
 
-    await sendOtp({ email: normalizedEmail, otp, purpose: "registration" });
+    await sendOTP({ email: normalizedEmail, otp, purpose: "registration" });
     res.json({ success: true, message: "OTP sent to email", ...buildOtpResponse(otpDoc) });
   } catch (err) {
     console.error(err);
@@ -364,7 +359,7 @@ const requestPasswordResetOtp = async (req, res) => {
       payload: { accountId: account._id.toString() },
     });
 
-    await sendOtp({ email: normalizedEmail, otp, purpose: "password reset" });
+    await sendOTP({ email: normalizedEmail, otp, purpose: "password reset" });
     return res.json({ message: "OTP sent to email", ...buildOtpResponse(otpDoc) });
   } catch (err) {
     console.error(err);
