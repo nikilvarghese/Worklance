@@ -1,4 +1,5 @@
 import axios from "axios";
+console.log("🚀 sendOTPEmail CALLED");
 
 export const sendOTPEmail = async (email, otp) => {
   try {
@@ -22,6 +23,8 @@ export const sendOTPEmail = async (email, otp) => {
     if (!senderEmail.includes("@")) {
       throw new Error("Invalid EMAIL_FROM format");
     }
+
+    console.log("Sending to Brevo:", email);
 
     // 🚀 Send email via Brevo API
     const response = await axios.post(
@@ -54,11 +57,6 @@ export const sendOTPEmail = async (email, otp) => {
 
     console.log("✅ Email sent:", response.data);
   } catch (error) {
-    console.error(
-      "❌ Brevo API error:",
-      error.response?.data || error.message
-    );
-
-    // IMPORTANT: don't throw → prevents breaking OTP flow
+    console.error("❌ FULL BREVO ERROR:", error);
   }
 };

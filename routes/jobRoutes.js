@@ -1,6 +1,7 @@
 const express = require("express");
 const Job = require("../models/Job");
 const Application = require("../models/Application");
+const SavedJob = require("../models/SavedJob");
 const { getJobs, normalizeJobPayload } = require("../controllers/jobController");
 const authMiddleware = require("../middleware/authMiddleware");
 
@@ -122,17 +123,11 @@ router.delete("/:id", authMiddleware, async (req, res) => {
       return res.status(403).json({ message: "You can only delete your own jobs" });
     }
 
-    const applications = await Application.countDocuments({ jobId: req.params.id });
-    if (applications > 0) {
-      const archived = await Job.findByIdAndUpdate(req.params.id, { isActive: false }, { new: true });
-      return res.json({
-        message: "Job has applications, so it was archived instead of deleted.",
-        job: archived,
-      });
-    }
-
+    await Application.deleteMany({ jobId: req.params.id });
+    await SavedJob.deleteMany({ jobId: req.params.id });
+    
     await Job.findByIdAndDelete(req.params.id);
-    return res.json({ message: "Job deleted successfully" });
+    return res.json({ message: "Job and associated applications deleted successfully" });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Server error" });

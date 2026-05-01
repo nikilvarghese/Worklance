@@ -5,6 +5,7 @@ import {
   BriefcaseIcon,
   CalendarDaysIcon,
   ClipboardDocumentListIcon,
+  ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 import axios from "../utils/axios";
 import JobCard from "../components/JobCard";
@@ -18,6 +19,8 @@ export default function Dashboard() {
   const [applications, setApplications] = useState([]);
   const [savedJobs, setSavedJobs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [userProfile, setUserProfile] = useState(null);
+  const [showIncompleteModal, setShowIncompleteModal] = useState(false);
 
   const savedIds = useMemo(
     () => new Set(savedJobs.map((item) => item.jobId?._id)),
@@ -35,14 +38,16 @@ export default function Dashboard() {
   const fetchDashboard = useCallback(async () => {
     setLoading(true);
     try {
-      const [dashboardRes, appRes, savedRes] = await Promise.all([
+      const [dashboardRes, appRes, savedRes, profileRes] = await Promise.all([
         axios.get("/dashboard"),
         axios.get("/applications"),
         axios.get("/saved"),
+        axios.get("/auth/profile").catch(() => ({ data: null })),
       ]);
       setStats(dashboardRes.data);
       setApplications(appRes.data);
       setSavedJobs(savedRes.data);
+      setUserProfile(profileRes.data);
     } catch (err) {
       addToast("Could not load dashboard", "error");
     } finally {
@@ -55,6 +60,23 @@ export default function Dashboard() {
   }, [fetchDashboard]);
 
   const applyJob = async (job) => {
+    const isProfileComplete = Boolean(
+      userProfile?.name &&
+      userProfile?.resume &&
+      userProfile?.dob &&
+      userProfile?.state &&
+      userProfile?.city &&
+      userProfile?.pincode &&
+      userProfile?.education &&
+      userProfile?.specialization &&
+      userProfile?.experienceLevel
+    );
+
+    if (!isProfileComplete) {
+      setShowIncompleteModal(true);
+      return;
+    }
+
     try {
       await axios.post("/applications", { jobId: job._id });
       addToast("Application submitted", "success");
@@ -257,6 +279,30 @@ export default function Dashboard() {
           </div>
         </aside>
       </section>
+
+      {showIncompleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4">
+          <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-amber-100">
+                <ExclamationTriangleIcon className="h-5 w-5 text-amber-600" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-950">Profile Incomplete</h3>
+            </div>
+            <p className="text-sm leading-6 text-slate-600">
+              Complete your profile to apply for jobs. Add your details, including your resume, to increase your chances of getting hired.
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button type="button" onClick={() => setShowIncompleteModal(false)} className="btn-secondary">
+                Cancel
+              </button>
+              <button type="button" onClick={() => { setShowIncompleteModal(false); window.location.href = "/profile"; }} className="btn-primary bg-amber-500 hover:bg-amber-600 border-transparent text-white">
+                Complete Profile
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -188,9 +188,9 @@ const [errors, setErrors] = useState({});
             </div>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              <Field label="Name"><input className="input" value={form.name || ""} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></Field>
-              <Field label="Company"><input className="input" value={form.company || ""} onChange={(e) => setForm({ ...form, company: e.target.value })} /></Field>
-              <Field label="Designation"><input className="input" value={form.designation || ""} onChange={(e) => setForm({ ...form, designation: e.target.value })} /></Field>
+              <Field label="Name *"><input className="input" value={form.name || ""} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></Field>
+              <Field label="Company *"><input className="input" value={form.company || ""} onChange={(e) => setForm({ ...form, company: e.target.value })} required /></Field>
+              <Field label="Designation *"><input className="input" value={form.designation || ""} onChange={(e) => setForm({ ...form, designation: e.target.value })} required /></Field>
              <Field label="Phone">
   <input
     type="tel"
@@ -220,8 +220,8 @@ const [errors, setErrors] = useState({});
     <p className="text-sm text-rose-600 mt-1">{errors.website}</p>
   )}
 </Field>
-              <Field label="Location"><input className="input" value={form.location || ""} onChange={(e) => setForm({ ...form, location: e.target.value })} /></Field>
-              <Field label="Industry"><input className="input" value={form.industry || ""} onChange={(e) => setForm({ ...form, industry: e.target.value })} /></Field>
+              <Field label="Location *"><input className="input" value={form.location || ""} onChange={(e) => setForm({ ...form, location: e.target.value })} required /></Field>
+              <Field label="Industry *"><input className="input" value={form.industry || ""} onChange={(e) => setForm({ ...form, industry: e.target.value })} required /></Field>
               <Field label="Team size">
   <input
     type="number"
