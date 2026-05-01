@@ -16,7 +16,7 @@ router.post("/verify-otp", async (req, res) => {
 
   await Otp.deleteMany({ email });
 
-  res.json({ message: "OTP verified" });
+  res.json({ success: true, message: "OTP verified" });
 });
 router.post("/send-otp", async (req, res) => {
   const { email } = req.body;
@@ -33,5 +33,5 @@ router.post("/send-otp", async (req, res) => {
 
   await sendOTPEmail(email, otp);
 
-  res.json({ message: "OTP sent" });
+  res.json({ success: true, message: "OTP sent" });
 });

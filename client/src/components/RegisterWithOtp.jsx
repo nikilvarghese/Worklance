@@ -36,23 +36,27 @@ export default function RegisterWithOtp() {
     }
 
     setIsSending(true);
-    try {
-      const response = await axios.post("/send-otp", { email });
-      if (response.data?.success) {
-        setIsOtpSent(true);
-        setMessage("OTP sent to your email. Please check your inbox.");
-        setMessageType("success");
-        setCooldown(45);
-      } else {
-        setMessage("Failed to send OTP. Please try again.");
-        setMessageType("error");
-      }
-    } catch (error) {
-      setMessage(error.response?.data?.message || "Unable to send OTP.");
-      setMessageType("error");
-    } finally {
-      setIsSending(false);
-    }
+try {
+  const response = await axios.post("/send-otp", { email });
+
+  // ✅ use status instead of data.success
+  if (response.status === 200) {
+    setIsOtpSent(true);
+    setMessage(response.data?.message || "OTP sent to your email. Please check your inbox.");
+    setMessageType("success");
+    setCooldown(45);
+  } else {
+    setMessage("Failed to send OTP. Please try again.");
+    setMessageType("error");
+  }
+
+} catch (error) {
+  console.error("OTP error:", error); // 🔥 important for debugging
+  setMessage(error.response?.data?.message || "Unable to send OTP.");
+  setMessageType("error");
+} finally {
+  setIsSending(false);
+}
   };
 
   const verifyOtp = async () => {
