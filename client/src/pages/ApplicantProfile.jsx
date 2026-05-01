@@ -130,7 +130,7 @@ export default function ApplicantProfile() {
 
             {applicant.resume && (
               <a
-                href={`${process.env.REACT_APP_API_ORIGIN || "http://localhost:5000"}/uploads/${applicant.resume}`}
+                href={`${process.env.REACT_APP_API_URL.replace('/api','')}/uploads/${applicant.resume}`}
                 target="_blank"
                 rel="noreferrer"
                 className="btn-primary mt-5 w-full"
