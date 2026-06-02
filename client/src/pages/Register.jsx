@@ -7,6 +7,13 @@ import PasswordInput from "../components/PasswordInput";
 
 const validateEmail = (email) => /^\S+@\S+\.\S+$/.test(email);
 
+const validatePassword = (password) =>
+  typeof password === "string" &&
+  /[a-z]/.test(password) &&
+  /[A-Z]/.test(password) &&
+  /\d/.test(password) &&
+  password.length >= 8;
+
 export default function Register() {
   const [form, setForm] = useState({
     firstName: "",
@@ -26,6 +33,29 @@ export default function Register() {
   const [loadingVerify, setLoadingVerify] = useState(false);
   const [cooldown, setCooldown] = useState(0);
   const navigate = useNavigate();
+
+  const isFormValid =
+    form.firstName.trim() !== "" &&
+    form.lastName.trim() !== "" &&
+    form.email.trim() !== "" &&
+    validatePassword(form.password) &&
+    (form.role !== "hr" || form.company.trim() !== "");
+
+  const handlePasswordChange = (newVal) => {
+    if (isOtpSent) {
+      const confirmChange = window.confirm(
+        "Do you want to change your password? If yes, your sent OTP will no longer be valid and you will need to generate a new OTP."
+      );
+      if (!confirmChange) {
+        return;
+      }
+      setIsOtpSent(false);
+      setIsOtpVerified(false);
+      setOtp("");
+      setPendingAuth(null);
+    }
+    setForm((prev) => ({ ...prev, password: newVal }));
+  };
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -164,7 +194,10 @@ export default function Register() {
               placeholder="First name"
               className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition-all placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10"
               value={form.firstName}
-              onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+              onChange={(e) => {
+                const cleanedVal = e.target.value.replace(/[^a-zA-Z]/g, "").slice(0, 15);
+                setForm({ ...form, firstName: cleanedVal });
+              }}
               required
             />
           </div>
@@ -174,7 +207,10 @@ export default function Register() {
               placeholder="Last name"
               className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition-all placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10"
               value={form.lastName}
-              onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+              onChange={(e) => {
+                const cleanedVal = e.target.value.replace(/[^a-zA-Z]/g, "").slice(0, 15);
+                setForm({ ...form, lastName: cleanedVal });
+              }}
               required
             />
           </div>
@@ -198,12 +234,20 @@ export default function Register() {
             <button
               type="button"
               onClick={sendOtp}
-              disabled={loadingSend || cooldown > 0}
+              disabled={loadingSend || cooldown > 0 || !isFormValid}
               className="w-[120px] shrink-0 inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:border disabled:border-slate-200"
             >
               {loadingSend ? "Sending..." : cooldown > 0 ? `Resend ${cooldown}s` : "Send OTP"}
             </button>
           </div>
+          {!isFormValid && (
+            <p className="text-xs text-amber-600 mt-1.5 flex items-center gap-1.5 font-medium transition-all duration-300">
+              <svg className="w-3.5 h-3.5 shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              The "Send OTP" button will be available once all details (First name, Last name, Email, Password - min 8 chars, 1 uppercase, 1 lowercase, 1 number{form.role === "hr" ? ", and Company name" : ""}) are filled.
+            </p>
+          )}
         </div>
 
         <div className="space-y-1.5">
@@ -233,7 +277,7 @@ export default function Register() {
             <label className="text-sm font-medium text-slate-700">Password</label>
             <PasswordInput
   value={form.password}
-  onChange={(e) => setForm({ ...form, password: e.target.value })}
+  onChange={(e) => handlePasswordChange(e.target.value)}
   placeholder="••••••••"
 />
           </div>

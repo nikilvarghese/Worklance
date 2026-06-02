@@ -16,6 +16,26 @@ const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Global middleware to prevent NoSQL query injection by recursively sanitizing '$' keys
+const sanitizeNoSql = (obj) => {
+  if (obj && typeof obj === "object") {
+    for (const key in obj) {
+      if (key.startsWith("$")) {
+        delete obj[key];
+      } else {
+        sanitizeNoSql(obj[key]);
+      }
+    }
+  }
+};
+
+app.use((req, res, next) => {
+  if (req.body) sanitizeNoSql(req.body);
+  if (req.query) sanitizeNoSql(req.query);
+  if (req.params) sanitizeNoSql(req.params);
+  next();
+});
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use(
   cors({
