@@ -34,12 +34,31 @@ export default function Register() {
   const [cooldown, setCooldown] = useState(0);
   const navigate = useNavigate();
 
+  const [touched, setTouched] = useState({
+    firstName: false,
+    lastName: false,
+    email: false,
+    password: false,
+    company: false,
+  });
+
+  const handleBlur = (field) => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+  };
+
   const isFormValid =
     form.firstName.trim() !== "" &&
     form.lastName.trim() !== "" &&
     form.email.trim() !== "" &&
     validatePassword(form.password) &&
     (form.role !== "hr" || form.company.trim() !== "");
+
+  const passChecks = {
+    length: form.password.length >= 8,
+    upper: /[A-Z]/.test(form.password),
+    lower: /[a-z]/.test(form.password),
+    number: /\d/.test(form.password),
+  };
 
   const [pendingChange, setPendingChange] = useState(null);
 
@@ -189,7 +208,7 @@ export default function Register() {
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-2 rounded-xl bg-slate-100 p-1">
+        <div className="grid grid-cols-2 gap-2.5 rounded-2xl bg-slate-100/80 p-1.5 border border-slate-200/50">
           {[
             ["user", "Job seeker"],
             ["hr", "Employer"],
@@ -198,9 +217,21 @@ export default function Register() {
               key={value}
               type="button"
               onClick={() => setForm({ ...form, role: value })}
-              className={`rounded-lg px-3 py-2.5 text-sm font-semibold transition-all ${form.role === value ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
-                }`}
+              className={`rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
+                form.role === value
+                  ? "bg-white text-blue-600 shadow-md shadow-blue-500/5 border border-blue-500/10 scale-[1.01]"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-white/40 border border-transparent"
+              }`}
             >
+              {value === "user" ? (
+                <svg className="w-4 h-4 shrink-0 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              ) : (
+                <svg className="w-4 h-4 shrink-0 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              )}
               {label}
             </button>
           ))}
@@ -211,21 +242,37 @@ export default function Register() {
             <label className="text-sm font-medium text-slate-700">First name</label>
             <input
               placeholder="First name"
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition-all placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10"
+              className={`w-full rounded-xl border px-4 py-3 text-sm outline-none transition-all placeholder:text-slate-400 focus:ring-4 ${
+                touched.firstName && form.firstName.trim() === ""
+                  ? "border-rose-300 bg-rose-50/10 focus:border-rose-500 focus:ring-rose-500/10"
+                  : "border-slate-200 bg-slate-50 focus:border-indigo-500 focus:bg-white focus:ring-indigo-500/10"
+              }`}
               value={form.firstName}
               onChange={(e) => handleFieldChange("firstName", e.target.value, (val) => val.replace(/[^a-zA-Z]/g, "").slice(0, 15))}
+              onBlur={() => handleBlur("firstName")}
               required
             />
+            {touched.firstName && form.firstName.trim() === "" && (
+              <p className="text-xs text-rose-600 font-medium">First name is required. Please fill it.</p>
+            )}
           </div>
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-slate-700">Last name</label>
             <input
               placeholder="Last name"
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition-all placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10"
+              className={`w-full rounded-xl border px-4 py-3 text-sm outline-none transition-all placeholder:text-slate-400 focus:ring-4 ${
+                touched.lastName && form.lastName.trim() === ""
+                  ? "border-rose-300 bg-rose-50/10 focus:border-rose-500 focus:ring-rose-500/10"
+                  : "border-slate-200 bg-slate-50 focus:border-indigo-500 focus:bg-white focus:ring-indigo-500/10"
+              }`}
               value={form.lastName}
               onChange={(e) => handleFieldChange("lastName", e.target.value, (val) => val.replace(/[^a-zA-Z]/g, "").slice(0, 15))}
+              onBlur={() => handleBlur("lastName")}
               required
             />
+            {touched.lastName && form.lastName.trim() === "" && (
+              <p className="text-xs text-rose-600 font-medium">Last name is required. Please fill it.</p>
+            )}
           </div>
         </div>
 
@@ -236,24 +283,32 @@ export default function Register() {
               type="email"
               value={form.email}
               onChange={(e) => handleFieldChange("email", e.target.value)}
+              onBlur={() => handleBlur("email")}
               placeholder="name@example.com"
-              className="flex-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition-all placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10"
+              className={`flex-1 w-full rounded-xl border px-4 py-3 text-sm outline-none transition-all placeholder:text-slate-400 focus:ring-4 ${
+                touched.email && form.email.trim() === ""
+                  ? "border-rose-300 bg-rose-50/10 focus:border-rose-500 focus:ring-rose-500/10"
+                  : "border-slate-200 bg-slate-50 focus:border-indigo-500 focus:bg-white focus:ring-indigo-500/10"
+              }`}
             />
             <button
               type="button"
               onClick={sendOtp}
               disabled={loadingSend || cooldown > 0 || !isFormValid}
-              className="w-[120px] shrink-0 inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:border disabled:border-slate-200"
+              className="w-[120px] shrink-0 inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60 disabled:bg-indigo-600 disabled:text-white/80 disabled:border-none"
             >
               {loadingSend ? "Sending..." : cooldown > 0 ? `Resend ${cooldown}s` : "Send OTP"}
             </button>
           </div>
+          {touched.email && form.email.trim() === "" && (
+            <p className="text-xs text-rose-600 font-medium">Email address is required. Please fill it.</p>
+          )}
           {!isFormValid && (
-            <p className="text-xs text-amber-600 mt-1.5 flex items-center gap-1.5 font-medium transition-all duration-300">
-              <svg className="w-3.5 h-3.5 shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <p className="text-xs text-slate-500 mt-2 flex items-center gap-1.5 font-medium transition-all duration-300">
+              <svg className="w-3.5 h-3.5 shrink-0 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              The "Send OTP" button will be available once all details (First name, Last name, Email, Password - min 8 chars, 1 uppercase, 1 lowercase, 1 number{form.role === "hr" ? ", and Company name" : ""}) are filled.
+              Complete all required fields to enable OTP.
             </p>
           )}
         </div>
@@ -273,7 +328,7 @@ export default function Register() {
               type="button"
               onClick={verifyOtp}
               disabled={!isOtpSent || loadingVerify}
-              className="w-[120px] shrink-0 inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:border disabled:border-slate-200"
+              className="w-[120px] shrink-0 inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 disabled:bg-slate-900 disabled:text-white/80 disabled:border-none"
             >
               {loadingVerify ? "Verifying..." : "Verify OTP"}
             </button>
@@ -284,20 +339,61 @@ export default function Register() {
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-slate-700">Password</label>
             <PasswordInput
-  value={form.password}
-  onChange={(e) => handleFieldChange("password", e.target.value)}
-  placeholder="••••••••"
-/>
+              value={form.password}
+              onChange={(e) => handleFieldChange("password", e.target.value)}
+              onBlur={() => handleBlur("password")}
+              placeholder="••••••••"
+              className={`w-full rounded-xl border px-4 py-3 text-sm outline-none transition-all placeholder:text-slate-400 focus:ring-4 ${
+                touched.password && form.password.trim() === ""
+                  ? "border-rose-300 bg-rose-50/10 focus:border-rose-500 focus:ring-rose-500/10"
+                  : "border-slate-200 bg-slate-50 focus:border-indigo-500 focus:bg-white focus:ring-indigo-500/10"
+              }`}
+            />
+            {touched.password && form.password.trim() === "" && (
+              <p className="text-xs text-rose-600 font-medium">Password is required. Please fill it.</p>
+            )}
+            <div className="mt-2.5 space-y-1.5 bg-slate-50/60 p-3 rounded-xl border border-slate-200/50">
+              <p className="text-xs font-semibold text-slate-500 mb-1">Password must contain:</p>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                {[
+                  [passChecks.length, "Min 8 characters"],
+                  [passChecks.upper, "One uppercase letter"],
+                  [passChecks.lower, "One lowercase letter"],
+                  [passChecks.number, "One number"],
+                ].map(([isValid, label], idx) => (
+                  <div key={idx} className="flex items-center gap-1.5 text-xs transition-all duration-300">
+                    {isValid ? (
+                      <svg className="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    ) : (
+                      <div className="w-3.5 h-3.5 rounded-full border border-slate-300 shrink-0" />
+                    )}
+                    <span className={isValid ? "text-emerald-700 font-medium" : "text-slate-500"}>
+                      {label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
           {form.role === "hr" && (
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-slate-700">Company name</label>
               <input
                 placeholder="e.g. Acme Corp"
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition-all placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10"
+                className={`w-full rounded-xl border px-4 py-3 text-sm outline-none transition-all placeholder:text-slate-400 focus:ring-4 ${
+                  touched.company && form.company.trim() === ""
+                    ? "border-rose-300 bg-rose-50/10 focus:border-rose-500 focus:ring-rose-500/10"
+                    : "border-slate-200 bg-slate-50 focus:border-indigo-500 focus:bg-white focus:ring-indigo-500/10"
+                }`}
                 value={form.company}
                 onChange={(e) => handleFieldChange("company", e.target.value)}
+                onBlur={() => handleBlur("company")}
               />
+              {touched.company && form.company.trim() === "" && (
+                <p className="text-xs text-rose-600 font-medium">Company name is required. Please fill it.</p>
+              )}
             </div>
           )}
         </div>
@@ -306,7 +402,7 @@ export default function Register() {
           type="button"
           disabled={!isOtpVerified}
           onClick={createAccount}
-          className="mt-2 w-full rounded-xl bg-indigo-600 px-5 py-3.5 text-sm font-semibold text-white transition-all hover:bg-indigo-700 hover:shadow-md hover:shadow-indigo-500/20 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:border disabled:border-slate-200 disabled:shadow-none"
+          className="mt-2 w-full rounded-xl bg-blue-600 px-5 py-3.5 text-sm font-semibold text-white transition-all hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/20 active:bg-blue-800 hover:shadow-lg hover:shadow-blue-500/10 disabled:cursor-not-allowed disabled:opacity-60 disabled:bg-blue-600 disabled:text-white/80 disabled:shadow-none"
         >
           <div className="flex items-center justify-center gap-2">
             <UserPlusIcon className="h-5 w-5" />
@@ -324,7 +420,7 @@ export default function Register() {
           <button
             type="button"
             onClick={handleGoogleSignup}
-            className="inline-flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:bg-slate-50 hover:border-slate-300"
+            className="inline-flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:bg-slate-50 hover:border-slate-300 focus:outline-none focus:ring-4 focus:ring-slate-100"
             aria-label="Continue with Google"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
