@@ -1,0 +1,20 @@
+[33m2813170[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m refs/remotes/origin/HEAD@{0}: fetch
+[33m2813170[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m refs/remotes/origin/main@{0}: fetch origin: storing head
+[33m88ba7e5[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m refs/heads/main@{0}: commit: register page update
+[33m88ba7e5[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m HEAD@{0}: commit: register page update
+[33mcb1652b[m refs/heads/main@{1}: Branch: renamed refs/heads/main to refs/heads/main
+[33mcb1652b[m HEAD@{1}: Branch: renamed refs/heads/main to refs/heads/main
+[33mcb1652b[m refs/heads/main@{2}: commit: initial commit
+[33mcb1652b[m HEAD@{3}: commit: initial commit
+[33m1d0c5f2[m refs/heads/main@{3}: commit: fix login redirect to frontend
+[33m1d0c5f2[m HEAD@{4}: commit: fix login redirect to frontend
+[33m83a02d2[m refs/heads/main@{4}: commit: fix login redirect to frontend
+[33m83a02d2[m HEAD@{5}: commit: fix login redirect to frontend
+[33m9f28580[m refs/heads/main@{5}: commit: fix login redirect to frontend
+[33m9f28580[m HEAD@{6}: commit: fix login redirect to frontend
+[33m495646e[m refs/heads/main@{6}: commit: fix login redirect to frontend
+[33m495646e[m HEAD@{7}: commit: fix login redirect to frontend
+[33m95d4a6d[m refs/heads/main@{7}: commit: fix login redirect to frontend
+[33m95d4a6d[m HEAD@{8}: commit: fix login redirect to frontend
+[33m73bf060[m refs/heads/main@{8}: commit: set email sender name
+[33m73bf060[m HEAD@{9}: commit: set email sender name
