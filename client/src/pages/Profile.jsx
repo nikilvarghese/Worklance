@@ -292,37 +292,37 @@ export default function Profile() {
             </div>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              <Field label="Name"><input className="input" value={formData.name || ""} onChange={(e) => updateField("name", e.target.value)} required /></Field>
+              <Field label="Name *"><input className="input" value={formData.name || ""} onChange={(e) => updateField("name", e.target.value)} required /></Field>
               <Field label="Headline"><input className="input" value={formData.headline || ""} onChange={(e) => updateField("headline", e.target.value)} /></Field>
               <Field label="Phone"><input className="input" value={formData.phone || ""} onChange={(e) => updateField("phone", e.target.value)} /></Field>
-              <Field label="Date of birth"><input type="date" className="input" value={formData.dob || ""} onChange={(e) => updateField("dob", e.target.value)} required /></Field>
-              <Field label="State">
+              <Field label="Date of birth *"><input type="date" className="input" value={formData.dob || ""} onChange={(e) => updateField("dob", e.target.value)} required /></Field>
+              <Field label="State *">
                 <select className="input" value={formData.state || ""} onChange={(e) => updateField("state", e.target.value)} required>
                   <option value="">Select state</option>
                   {states.map((state) => <option key={state}>{state}</option>)}
                 </select>
               </Field>
-              <Field label="City">
+              <Field label="City *">
                 <select className="input" value={formData.city || ""} onChange={(e) => updateField("city", e.target.value)} required>
                   <option value="">Select city</option>
                   {selectedCities.map((city) => <option key={city}>{city}</option>)}
                 </select>
               </Field>
-              <Field label="Pincode"><input className="input" value={formData.pincode || ""} onChange={(e) => updateField("pincode", e.target.value)} required /></Field>
-              <Field label="Education">
+              <Field label="Pincode *"><input className="input" value={formData.pincode || ""} onChange={(e) => updateField("pincode", e.target.value)} required /></Field>
+              <Field label="Education *">
                 <select className="input" value={formData.education || ""} onChange={(e) => updateField("education", e.target.value)} required>
                   <option value="">Select education</option>
                   {educationOptions.map((item) => <option key={item}>{item}</option>)}
                 </select>
               </Field>
-              <Field label="Specialization"><ChipInput value={formData.specializationList || []} onChange={(value) => updateField("specializationList", value)} placeholder="Add specialization" /></Field>
-              <Field label="Experience level"><input className="input" value={formData.experienceLevel || ""} onChange={(e) => updateField("experienceLevel", e.target.value)} /></Field>
+              <Field label="Specialization *"><ChipInput value={formData.specializationList || []} onChange={(value) => updateField("specializationList", value)} placeholder="Add specialization" /></Field>
+              <Field label="Experience level *"><input className="input" value={formData.experienceLevel || ""} onChange={(e) => updateField("experienceLevel", e.target.value)} /></Field>
               <Field label="Desired salary"><input type="number" className="input" value={formData.desiredSalary || ""} onChange={(e) => updateField("desiredSalary", e.target.value)} /></Field>
               <Field label="Portfolio"><ChipInput value={formData.portfolio || []} onChange={(value) => updateField("portfolio", value)} placeholder="Add portfolio link and press Enter" /></Field>
               <Field label="Skills"><ChipInput value={formData.skills || []} onChange={(value) => updateField("skills", value)} placeholder="Add skill" /></Field>
               <Field label="Preferred roles"><ChipInput value={formData.preferredRoles || []} onChange={(value) => updateField("preferredRoles", value)} placeholder="Add preferred role" /></Field>
               <Field label="Languages"><ChipInput value={formData.languages || []} onChange={(value) => updateField("languages", value)} placeholder="Add language" /></Field>
-              <Field label="Resume">
+              <Field label="Resume *">
                 <input
                   type="file"
                   className="input"

@@ -1,4 +1,6 @@
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import axios from "../utils/axios";
 import {
   HomeIcon,
   BriefcaseIcon,
@@ -8,12 +10,40 @@ import {
   ChartBarIcon,
   UserIcon,
   ArrowRightOnRectangleIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  ExclamationTriangleIcon
 } from "@heroicons/react/24/outline";
 
 export default function HrSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [hrProfile, setHrProfile] = useState(null);
+  const [showIncompleteModal, setShowIncompleteModal] = useState(false);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await axios.get("/auth/me");
+        setHrProfile(res.data);
+      } catch (err) {
+        console.error("Could not fetch HR profile", err);
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  const isHRProfileComplete = Boolean(
+    hrProfile?.name &&
+    hrProfile?.company &&
+    hrProfile?.designation &&
+    hrProfile?.location &&
+    hrProfile?.industry
+  );
+
+  const handleNavigateToHRProfile = () => {
+    setShowIncompleteModal(false);
+    navigate("/hr-profile");
+  };
 
   const handleLogout = () => {
     localStorage.clear();
@@ -79,10 +109,19 @@ export default function HrSidebar() {
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
+
+            const handleClick = (e) => {
+              if (item.path === "/post-job" && hrProfile && !isHRProfileComplete) {
+                e.preventDefault();
+                setShowIncompleteModal(true);
+              }
+            };
+
             return (
               <NavLink
                 key={item.path}
                 to={item.path}
+                onClick={handleClick}
                 className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
                   isActive
                     ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700"
@@ -108,6 +147,30 @@ export default function HrSidebar() {
           <span className="font-medium">Logout</span>
         </button>
       </div>
+
+      {showIncompleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4">
+          <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-amber-100">
+                <ExclamationTriangleIcon className="h-5 w-5 text-amber-600" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-950">Incomplete Profile</h3>
+            </div>
+            <p className="text-sm leading-6 text-slate-600">
+              Complete your company profile before posting jobs. A complete profile builds trust and attracts better candidates.
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button type="button" onClick={() => setShowIncompleteModal(false)} className="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-lg transition-colors">
+                Cancel
+              </button>
+              <button type="button" onClick={handleNavigateToHRProfile} className="px-4 py-2 text-sm font-medium bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors">
+                Go to Profile
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

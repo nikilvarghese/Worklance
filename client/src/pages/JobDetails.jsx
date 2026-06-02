@@ -71,9 +71,14 @@ export default function JobDetails() {
 
   const isProfileComplete = Boolean(
     userProfile?.name &&
-    userProfile?.email &&
     userProfile?.resume &&
-    userProfile?.skills?.length > 0
+    userProfile?.dob &&
+    userProfile?.state &&
+    userProfile?.city &&
+    userProfile?.pincode &&
+    userProfile?.education &&
+    userProfile?.specialization &&
+    userProfile?.experienceLevel
   );
 
   const handleNavigateToProfile = () => {
@@ -225,6 +230,15 @@ export default function JobDetails() {
                 <h3 className="section-title">{applied ? "Application submitted" : "Apply for this role"}</h3>
                 {applied ? (
                   <p className="muted mt-2">You can track this role from your Applications page.</p>
+                ) : !isProfileComplete ? (
+                  <div className="mt-5 text-center p-6 border border-dashed border-amber-200 rounded-lg bg-amber-50">
+                    <ExclamationTriangleIcon className="mx-auto h-8 w-8 text-amber-500 mb-2" />
+                    <h4 className="text-sm font-semibold text-amber-800">Profile Incomplete</h4>
+                    <p className="text-sm text-amber-700 mt-1 mb-4">You must complete your profile, including your resume, before you can apply for jobs.</p>
+                    <button type="button" onClick={handleNavigateToProfile} className="btn-primary bg-amber-500 hover:bg-amber-600 border-transparent text-white">
+                      Complete Profile
+                    </button>
+                  </div>
                 ) : (
                   <form onSubmit={submitApplication} className="mt-5 space-y-4">
                     <div>

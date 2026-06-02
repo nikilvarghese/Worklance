@@ -37,10 +37,30 @@ export default function PostJob() {
   const [showIncompleteModal, setShowIncompleteModal] = useState(false);
 
   useEffect(() => {
+    // Load draft if it exists and is less than 3 days old
+    const savedDraft = localStorage.getItem("jobDraft");
+    if (savedDraft) {
+      try {
+        const draftObj = JSON.parse(savedDraft);
+        if (new Date().getTime() - draftObj.timestamp < 3 * 24 * 60 * 60 * 1000) {
+          setForm(draftObj.form);
+        } else {
+          localStorage.removeItem("jobDraft");
+        }
+      } catch (e) {
+        console.error("Error parsing draft", e);
+      }
+    }
+
     const fetchProfile = async () => {
       try {
         const res = await axios.get("/auth/me");
         setHrProfile(res.data);
+        setForm((prev) => ({
+          ...prev,
+          company: prev.company || res.data.company || "",
+          location: prev.location || res.data.location || "",
+        }));
       } catch (err) {
         console.error("Could not fetch HR profile", err);
       }
@@ -64,8 +84,25 @@ export default function PostJob() {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
+  const handleSaveDraft = () => {
+    const draftObj = {
+      timestamp: new Date().getTime(),
+      form,
+    };
+    localStorage.setItem("jobDraft", JSON.stringify(draftObj));
+    addToast("Draft saved successfully", "success");
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const salaryMin = Number(form.salaryMin || 0);
+    const salaryMax = Number(form.salaryMax || salaryMin || 0);
+
+    if (salaryMax < salaryMin) {
+      addToast("Max salary cannot be less than Min salary", "error");
+      return;
+    }
+
     setLoading(true);
     try {
       const salaryMin = Number(form.salaryMin || 0);
@@ -121,8 +158,8 @@ export default function PostJob() {
 
             <Section title="Compensation and requirements">
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Min salary"><input type="number" className="input" value={form.salaryMin} onChange={(e) => update("salaryMin", e.target.value)} required /></Field>
-                <Field label="Max salary"><input type="number" className="input" value={form.salaryMax} onChange={(e) => update("salaryMax", e.target.value)} required /></Field>
+                <Field label="Min Monthly Salary"><input type="number" className="input" value={form.salaryMin} onChange={(e) => update("salaryMin", e.target.value)} required /></Field>
+                <Field label="Max Monthly Salary"><input type="number" className="input" value={form.salaryMax} onChange={(e) => update("salaryMax", e.target.value)} required /></Field>
                 <Field label="Experience"><select className="input" value={form.experience} onChange={(e) => update("experience", e.target.value)}>{["0-1 years", "1-3 years", "3-5 years", "5+ years"].map((item) => <option key={item}>{item}</option>)}</select></Field>
                 <Field label="Education"><select className="input" value={form.education} onChange={(e) => update("education", e.target.value)}>{["High School", "Bachelor's", "Master's", "PhD"].map((item) => <option key={item}>{item}</option>)}</select></Field>
                 <Field label="Skills"><input className="input" value={form.skills} onChange={(e) => update("skills", e.target.value)} placeholder="React, Node.js, SQL" /></Field>
@@ -157,21 +194,32 @@ export default function PostJob() {
               </div>
             </Section>
 
-            <button
-              type={isHRProfileComplete ? "submit" : "button"}
-              onClick={(e) => {
-                if (!isHRProfileComplete) {
-                  e.preventDefault();
-                  setShowIncompleteModal(true);
-                }
-              }}
-              disabled={loading}
-              className="btn-primary w-full"
-              title={!isHRProfileComplete ? "Complete your profile to post jobs" : ""}
-            >
-              <PaperAirplaneIcon className="h-4 w-4" />
-              {loading ? "Publishing..." : "Publish job"}
-            </button>
+            <div className="space-y-3">
+              <button
+                type={isHRProfileComplete ? "submit" : "button"}
+                onClick={(e) => {
+                  if (!isHRProfileComplete) {
+                    e.preventDefault();
+                    setShowIncompleteModal(true);
+                  }
+                }}
+                disabled={loading}
+                className="btn-primary w-full"
+                title={!isHRProfileComplete ? "Complete your profile to post jobs" : ""}
+              >
+                <PaperAirplaneIcon className="h-4 w-4" />
+                {loading ? "Publishing..." : "Publish job"}
+              </button>
+              
+              <button
+                type="button"
+                onClick={handleSaveDraft}
+                className="btn-secondary w-full"
+              >
+                Save as Draft
+              </button>
+              <p className="text-xs text-center text-slate-500">Draft will be deleted in 3 days</p>
+            </div>
           </aside>
         </div>
       </form>
