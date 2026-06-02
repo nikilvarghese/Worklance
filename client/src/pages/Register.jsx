@@ -41,20 +41,39 @@ export default function Register() {
     validatePassword(form.password) &&
     (form.role !== "hr" || form.company.trim() !== "");
 
-  const handlePasswordChange = (newVal) => {
+  const [pendingChange, setPendingChange] = useState(null);
+
+  const handleFieldChange = (field, value, cleaningFn) => {
+    const finalVal = cleaningFn ? cleaningFn(value) : value;
+    
     if (isOtpSent) {
-      const confirmChange = window.confirm(
-        "Do you want to change your password? If yes, your sent OTP will no longer be valid and you will need to generate a new OTP."
-      );
-      if (!confirmChange) {
-        return;
+      if (form[field] === finalVal) return;
+      setPendingChange({ field, value: finalVal });
+    } else {
+      setForm((prev) => ({ ...prev, [field]: finalVal }));
+      if (field === "email") {
+        setIsOtpSent(false);
+        setIsOtpVerified(false);
+        setPendingAuth(null);
       }
-      setIsOtpSent(false);
-      setIsOtpVerified(false);
-      setOtp("");
-      setPendingAuth(null);
     }
-    setForm((prev) => ({ ...prev, password: newVal }));
+  };
+
+  const confirmChange = () => {
+    if (!pendingChange) return;
+    const { field, value } = pendingChange;
+    
+    setIsOtpSent(false);
+    setIsOtpVerified(false);
+    setOtp("");
+    setPendingAuth(null);
+    
+    setForm((prev) => ({ ...prev, [field]: value }));
+    setPendingChange(null);
+  };
+
+  const cancelChange = () => {
+    setPendingChange(null);
   };
 
   useEffect(() => {
@@ -194,10 +213,7 @@ export default function Register() {
               placeholder="First name"
               className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition-all placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10"
               value={form.firstName}
-              onChange={(e) => {
-                const cleanedVal = e.target.value.replace(/[^a-zA-Z]/g, "").slice(0, 15);
-                setForm({ ...form, firstName: cleanedVal });
-              }}
+              onChange={(e) => handleFieldChange("firstName", e.target.value, (val) => val.replace(/[^a-zA-Z]/g, "").slice(0, 15))}
               required
             />
           </div>
@@ -207,10 +223,7 @@ export default function Register() {
               placeholder="Last name"
               className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition-all placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10"
               value={form.lastName}
-              onChange={(e) => {
-                const cleanedVal = e.target.value.replace(/[^a-zA-Z]/g, "").slice(0, 15);
-                setForm({ ...form, lastName: cleanedVal });
-              }}
+              onChange={(e) => handleFieldChange("lastName", e.target.value, (val) => val.replace(/[^a-zA-Z]/g, "").slice(0, 15))}
               required
             />
           </div>
@@ -222,12 +235,7 @@ export default function Register() {
             <input
               type="email"
               value={form.email}
-              onChange={(e) => {
-                setForm({ ...form, email: e.target.value });
-                setIsOtpSent(false);
-                setIsOtpVerified(false);
-                setPendingAuth(null);
-              }}
+              onChange={(e) => handleFieldChange("email", e.target.value)}
               placeholder="name@example.com"
               className="flex-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition-all placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10"
             />
@@ -277,7 +285,7 @@ export default function Register() {
             <label className="text-sm font-medium text-slate-700">Password</label>
             <PasswordInput
   value={form.password}
-  onChange={(e) => handlePasswordChange(e.target.value)}
+  onChange={(e) => handleFieldChange("password", e.target.value)}
   placeholder="••••••••"
 />
           </div>
@@ -288,7 +296,7 @@ export default function Register() {
                 placeholder="e.g. Acme Corp"
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition-all placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10"
                 value={form.company}
-                onChange={(e) => setForm({ ...form, company: e.target.value })}
+                onChange={(e) => handleFieldChange("company", e.target.value)}
               />
             </div>
           )}
@@ -333,6 +341,40 @@ export default function Register() {
           Already registered? <Link to="/login" className="font-semibold text-indigo-600 hover:text-indigo-700">Sign in</Link>
         </p>
       </div>
+
+      {pendingChange && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 animate-fade-in">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-slate-100 flex flex-col gap-4 transform transition-all scale-100">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50">
+              <svg className="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-slate-900">Change Registration Details?</h3>
+              <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+                Modifying this detail will invalidate your current OTP. You will need to request and verify a new OTP to complete your registration.
+              </p>
+            </div>
+            <div className="flex gap-3 mt-2">
+              <button
+                type="button"
+                onClick={cancelChange}
+                className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition-all hover:bg-slate-50 hover:border-slate-300"
+              >
+                No, keep
+              </button>
+              <button
+                type="button"
+                onClick={confirmChange}
+                className="flex-1 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-500/20"
+              >
+                Yes, change
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AuthFrame>
   );
 }
