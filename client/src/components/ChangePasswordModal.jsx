@@ -14,6 +14,13 @@ export default function ChangePasswordModal({ isOpen, onClose }) {
   });
   const [changing, setChanging] = useState(false);
 
+  const passChecks = {
+    length: data.newPassword.length >= 8,
+    upper: /[A-Z]/.test(data.newPassword),
+    lower: /[a-z]/.test(data.newPassword),
+    number: /\d/.test(data.newPassword),
+  };
+
   if (!isOpen) return null;
 
   const handleChangePassword = async (e) => {
@@ -23,6 +30,11 @@ export default function ChangePasswordModal({ isOpen, onClose }) {
 
     if (data.newPassword !== data.confirmPassword) {
       addToast("New passwords do not match", "error");
+      return;
+    }
+
+    if (!passChecks.length || !passChecks.upper || !passChecks.lower || !passChecks.number) {
+      addToast("Password must be at least 8 characters and include uppercase, lowercase, and a number", "error");
       return;
     }
 
@@ -96,6 +108,32 @@ export default function ChangePasswordModal({ isOpen, onClose }) {
             />
           </label>
 
+          {/* Checklist */}
+          <div className="mt-2.5 space-y-1.5 bg-slate-50/60 p-3 rounded-xl border border-slate-200/50">
+            <p className="text-xs font-semibold text-slate-500 mb-1">Password must contain:</p>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+              {[
+                [passChecks.length, "Min 8 characters"],
+                [passChecks.upper, "One uppercase letter"],
+                [passChecks.lower, "One lowercase letter"],
+                [passChecks.number, "One number"],
+              ].map(([isValid, label], idx) => (
+                <div key={idx} className="flex items-center gap-1.5 text-xs transition-all duration-300">
+                  {isValid ? (
+                    <svg className="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  ) : (
+                    <div className="w-3.5 h-3.5 rounded-full border border-slate-300 shrink-0" />
+                  )}
+                  <span className={isValid ? "text-emerald-700 font-medium" : "text-slate-500"}>
+                    {label}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* Confirm Password */}
           <label className="block">
             <span className="label mb-1 block">Confirm New Password</span>
@@ -143,6 +181,10 @@ export default function ChangePasswordModal({ isOpen, onClose }) {
                   changing ||
                   !data.oldPassword ||
                   !data.newPassword ||
+                  !passChecks.length ||
+                  !passChecks.upper ||
+                  !passChecks.lower ||
+                  !passChecks.number ||
                   data.newPassword !== data.confirmPassword
                 }
                 className="btn-primary"

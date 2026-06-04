@@ -468,16 +468,17 @@ const googleCallback = async (req, res) => {
         if (existingUser) {
           return res.send(generateErrorRedirectScript("This email is already registered as a job seeker. Please sign in with that account."));
         }
-        const password = crypto.randomBytes(32).toString("hex");
-        const hr = await Hr.create({
-          name: profile.name,
-          firstName: profile.firstName,
-          lastName: profile.lastName,
-          email: normalizedEmail,
-          password: await bcrypt.hash(password, 10),
-          passwordSet: false,
-        });
-        const token = createToken(hr._id, "hr");
+        const token = jwt.sign(
+          {
+            email: normalizedEmail,
+            firstName: profile.firstName || "",
+            lastName: profile.lastName || "",
+            role: "hr",
+            isTempRegister: true,
+          },
+          process.env.JWT_SECRET || "jobportal-dev-secret",
+          { expiresIn: "1h" }
+        );
         return res.send(generateAuthRedirectScript(token, "hr", true));
       }
     } else {
@@ -499,16 +500,17 @@ const googleCallback = async (req, res) => {
         if (existingHr) {
           return res.send(generateErrorRedirectScript("This email is already registered as an employer. Please sign in with that account."));
         }
-        const password = crypto.randomBytes(32).toString("hex");
-        const user = await User.create({
-          name: profile.name,
-          firstName: profile.firstName,
-          lastName: profile.lastName,
-          email: normalizedEmail,
-          password: await bcrypt.hash(password, 10),
-          passwordSet: false,
-        });
-        const token = createToken(user._id, "user");
+        const token = jwt.sign(
+          {
+            email: normalizedEmail,
+            firstName: profile.firstName || "",
+            lastName: profile.lastName || "",
+            role: "user",
+            isTempRegister: true,
+          },
+          process.env.JWT_SECRET || "jobportal-dev-secret",
+          { expiresIn: "1h" }
+        );
         return res.send(generateAuthRedirectScript(token, "user", true));
       }
     }
@@ -553,7 +555,7 @@ exports.loginUser = async (req, res) => {
     }
 
     const user = await User.findOne({ email: email.toLowerCase().trim() });
-    if (!user) return res.status(400).json({ message: "User not found" });
+    if (!user) return res.status(400).json({ message: "No account found. Please register first." });
 
     if (user.passwordSet === false) {
       return res.status(400).json({ message: "Please login using Google or set a password first." });
@@ -587,7 +589,8 @@ exports.loginHR = async (req, res) => {
     }
 
     const hr = await Hr.findOne({ email: email.toLowerCase().trim() });
-    if (!hr) return res.status(400).json({ message: "HR not found" });
+    if (!hr) return res.status(400).json({ message: "No account found. Please register first." });
+
 
     if (hr.passwordSet === false) {
       return res.status(400).json({ message: "Please login using Google or set a password first." });
@@ -688,29 +691,97 @@ exports.deleteUser = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-// ================= SET PASSWORD =================
 exports.setPassword = async (req, res) => {
   try {
-    const { password } = req.body;
+    const { password, firstName, lastName, company } = req.body;
     if (!password) {
       return res.status(400).json({ message: "Password is required" });
     }
-    if (password.length < 8) {
-      return res.status(400).json({ message: "Password must be at least 8 characters" });
+    if (!validatePassword(password)) {
+      return res.status(400).json({ message: "Password must be at least 8 characters and include uppercase, lowercase, and a number." });
     }
 
-    const Model = req.user.role === "hr" ? Hr : User;
-    const account = await Model.findById(req.user.id);
+    if (req.user && req.user.isTempRegister) {
+      const role = req.user.role || "user";
+      const normalizedEmail = req.user.email.toLowerCase().trim();
 
-    if (!account) {
-      return res.status(404).json({ message: "Account not found" });
+      const existingUser = await User.findOne({ email: normalizedEmail });
+      const existingHr = await Hr.findOne({ email: normalizedEmail });
+      if (existingUser || existingHr) {
+        return res.status(400).json({ message: "Account already exists" });
+      }
+
+      const finalFirstName = (firstName !== undefined ? firstName : req.user.firstName || "").trim();
+      const finalLastName = (lastName !== undefined ? lastName : req.user.lastName || "").trim();
+      const fullName = normalizeName({ firstName: finalFirstName, lastName: finalLastName });
+
+      if (!finalFirstName || !finalLastName) {
+        return res.status(400).json({ message: "First name and last name are required." });
+      }
+
+      let createdAccount;
+      if (role === "hr") {
+        const finalCompany = (company || "").trim();
+        if (!finalCompany) {
+          return res.status(400).json({ message: "Company name is required." });
+        }
+        createdAccount = await Hr.create({
+          name: fullName,
+          firstName: finalFirstName,
+          lastName: finalLastName,
+          email: normalizedEmail,
+          password: await bcrypt.hash(password, 10),
+          company: finalCompany,
+          passwordSet: true,
+        });
+      } else {
+        createdAccount = await User.create({
+          name: fullName,
+          firstName: finalFirstName,
+          lastName: finalLastName,
+          email: normalizedEmail,
+          password: await bcrypt.hash(password, 10),
+          passwordSet: true,
+        });
+      }
+
+      const token = createToken(createdAccount._id, role);
+      return res.json({
+        message: "Account created and password set successfully",
+        token,
+        role,
+      });
+    } else {
+      const Model = req.user.role === "hr" ? Hr : User;
+      const account = await Model.findById(req.user.id);
+
+      if (!account) {
+        return res.status(404).json({ message: "Account not found" });
+      }
+
+      if (firstName !== undefined && lastName !== undefined) {
+        const finalFirstName = firstName.trim();
+        const finalLastName = lastName.trim();
+        if (finalFirstName && finalLastName) {
+          account.firstName = finalFirstName;
+          account.lastName = finalLastName;
+          account.name = normalizeName({ firstName: finalFirstName, lastName: finalLastName });
+        }
+      }
+      if (req.user.role === "hr" && company !== undefined) {
+        const finalCompany = company.trim();
+        if (finalCompany) {
+          account.company = finalCompany;
+        }
+      }
+
+      account.password = await bcrypt.hash(password, 10);
+      account.passwordSet = true;
+      await account.save();
+
+      const token = createToken(account._id, req.user.role);
+      res.json({ message: "Password set successfully", token, role: req.user.role });
     }
-
-    account.password = await bcrypt.hash(password, 10);
-    account.passwordSet = true;
-    await account.save();
-
-    res.json({ message: "Password set successfully" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
@@ -723,6 +794,7 @@ exports.requestPasswordResetOtp = requestPasswordResetOtp;
 exports.verifyPasswordResetOtp = verifyPasswordResetOtp;
 exports.googleRedirect = googleRedirect;
 exports.googleCallback = googleCallback;
+exports.validatePassword = validatePassword;
 
 // Compatibility with existing routes
 exports.register = exports.registerUser;

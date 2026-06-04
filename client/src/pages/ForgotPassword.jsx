@@ -12,7 +12,6 @@ export default function ForgotPassword() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
-  const [passwordError, setPasswordError] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from;
@@ -92,21 +91,14 @@ export default function ForgotPassword() {
   const handleEmailChange = (e) => setForm({ ...form, email: e.target.value });
   const handleOtpChange = (e) => setForm({ ...form, otp: e.target.value.replace(/[^0-9]/g, "") });
   const handlePasswordChange = (e) => {
-    const value = e.target.value;
-    setForm({ ...form, password: value });
+    setForm({ ...form, password: e.target.value });
+  };
 
-    // 🔥 validation
-    const hasUpper = /[A-Z]/.test(value);
-    const hasLower = /[a-z]/.test(value);
-    const hasNumber = /[0-9]/.test(value);
-
-    if (!value) {
-      setPasswordError("");
-    } else if (!hasUpper || !hasLower || !hasNumber) {
-      setPasswordError("Password must contain 1 uppercase, 1 lowercase, and 1 number");
-    } else {
-      setPasswordError("");
-    }
+  const passChecks = {
+    length: form.password.length >= 8,
+    upper: /[A-Z]/.test(form.password),
+    lower: /[a-z]/.test(form.password),
+    number: /\d/.test(form.password),
   };
 
   return (
@@ -140,14 +132,35 @@ export default function ForgotPassword() {
               required
             />
             <PasswordInput
-  value={form.password}
-  onChange={handlePasswordChange}
-  placeholder="New password"
-  required
-/>
-            {passwordError && (
-              <p className="text-sm text-rose-600 mt-1">{passwordError}</p>
-            )}
+              value={form.password}
+              onChange={handlePasswordChange}
+              placeholder="New password"
+              required
+            />
+            <div className="mt-2.5 space-y-1.5 bg-slate-50/60 p-3 rounded-xl border border-slate-200/50">
+              <p className="text-xs font-semibold text-slate-500 mb-1">Password must contain:</p>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                {[
+                  [passChecks.length, "Min 8 characters"],
+                  [passChecks.upper, "One uppercase letter"],
+                  [passChecks.lower, "One lowercase letter"],
+                  [passChecks.number, "One number"],
+                ].map(([isValid, label], idx) => (
+                  <div key={idx} className="flex items-center gap-1.5 text-xs transition-all duration-300">
+                    {isValid ? (
+                      <svg className="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    ) : (
+                      <div className="w-3.5 h-3.5 rounded-full border border-slate-300 shrink-0" />
+                    )}
+                    <span className={isValid ? "text-emerald-700 font-medium" : "text-slate-500"}>
+                      {label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </>
         )}
 
@@ -165,8 +178,10 @@ export default function ForgotPassword() {
             disabled={
               loading ||
               form.otp.length !== 6 ||
-              form.password.length < 8 ||
-              passwordError
+              !passChecks.length ||
+              !passChecks.upper ||
+              !passChecks.lower ||
+              !passChecks.number
             }
             className="btn-secondary w-full"
           >

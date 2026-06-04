@@ -16,6 +16,7 @@ const {
   googleCallback,
   setPassword,
   deleteUser,
+  validatePassword,
 } = require("../controllers/authController");
 const authMiddleware = require("../middleware/authMiddleware");
 const User = require("../models/User");
@@ -251,6 +252,9 @@ router.delete("/delete", authMiddleware, deleteUser);
 router.put("/change-password", authMiddleware, async (req, res) => {
   try {
     const { oldPassword, newPassword } = req.body;
+    if (!newPassword || !validatePassword(newPassword)) {
+      return res.status(400).json({ message: "Password must be at least 8 characters and include uppercase, lowercase, and a number." });
+    }
     const isHr = req.user.role === "hr";
     const Model = isHr ? Hr : User;
 
