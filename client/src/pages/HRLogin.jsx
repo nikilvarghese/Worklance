@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { BuildingOffice2Icon, LockClosedIcon } from "@heroicons/react/24/outline";
+import { LockClosedIcon } from "@heroicons/react/24/outline";
 import axios from "../utils/axios";
 import { AuthFrame } from "./UserLogin";
 import PasswordInput from "../components/PasswordInput";
