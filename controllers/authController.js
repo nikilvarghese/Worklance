@@ -554,15 +554,28 @@ exports.loginUser = async (req, res) => {
       return res.status(400).json({ message: "Email and password are required" });
     }
 
-    const user = await User.findOne({ email: email.toLowerCase().trim() });
-    if (!user) return res.status(400).json({ message: "No account found. Please register first." });
+    const normalizedEmail = email.toLowerCase().trim();
+    const user = await User.findOne({ email: normalizedEmail });
+    const hr = await Hr.findOne({ email: normalizedEmail });
 
-    if (user.passwordSet === false) {
+    if (!user && !hr) {
+      return res.status(400).json({ message: "No account found. Please register first." });
+    }
+
+    const account = user || hr;
+
+    if (account.passwordSet === false) {
       return res.status(400).json({ message: "Please login using Google or set a password first." });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+    const isMatch = await bcrypt.compare(password, account.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Incorrect password" });
+    }
+
+    if (!user) {
+      return res.status(400).json({ message: "This email is registered as an employer. Please sign in as employer." });
+    }
 
     const token = createToken(user._id, "user");
 
@@ -588,16 +601,28 @@ exports.loginHR = async (req, res) => {
       return res.status(400).json({ message: "Email and password are required" });
     }
 
-    const hr = await Hr.findOne({ email: email.toLowerCase().trim() });
-    if (!hr) return res.status(400).json({ message: "No account found. Please register first." });
+    const normalizedEmail = email.toLowerCase().trim();
+    const user = await User.findOne({ email: normalizedEmail });
+    const hr = await Hr.findOne({ email: normalizedEmail });
 
+    if (!user && !hr) {
+      return res.status(400).json({ message: "No account found. Please register first." });
+    }
 
-    if (hr.passwordSet === false) {
+    const account = hr || user;
+
+    if (account.passwordSet === false) {
       return res.status(400).json({ message: "Please login using Google or set a password first." });
     }
 
-    const isMatch = await bcrypt.compare(password, hr.password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+    const isMatch = await bcrypt.compare(password, account.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Incorrect password" });
+    }
+
+    if (!hr) {
+      return res.status(400).json({ message: "This email is registered as a job seeker. Please sign in as job seeker." });
+    }
 
     const token = createToken(hr._id, "hr");
 
