@@ -94,10 +94,6 @@ export default function HRLogin() {
           Looking for jobs? <Link to="/login" className="font-semibold text-indigo-700">Use candidate login</Link>
         </p>
       </div>
-      <div className="mt-6 rounded-lg bg-slate-50 p-4 text-sm text-slate-600">
-        <BuildingOffice2Icon className="mb-2 h-5 w-5 text-teal-700" />
-        Demo employer: hr@demo.com / password123
-      </div>
     </AuthFrame>
   );
 }

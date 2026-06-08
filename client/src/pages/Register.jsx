@@ -335,7 +335,7 @@ export default function Register() {
           </div>
         </div>
 
-        <div className={`grid gap-4 ${form.role === "hr" ? "grid-cols-2" : "grid-cols-1"}`}>
+        <div className={`grid gap-4 ${form.role === "hr" ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1"}`}>
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-slate-700">Password</label>
             <PasswordInput

@@ -349,7 +349,7 @@ const requestPasswordResetOtp = async (req, res) => {
     const normalizedEmail = email.toLowerCase().trim();
     const { account, role } = await getUserByEmail(normalizedEmail);
     if (!account) {
-      return res.json({ message: "If an account exists, an OTP has been sent" });
+      return res.status(404).json({ message: "Account not found" });
     }
 
     const { otp, otpDoc } = await createOtpRecord({
