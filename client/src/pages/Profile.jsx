@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   DocumentArrowUpIcon,
   PencilSquareIcon,
@@ -11,6 +11,8 @@ import { useToast } from "../components/Toast";
 import DeleteAccountModal from "../components/DeleteAccountModal";
 import ChangePasswordModal from "../components/ChangePasswordModal";
 import { initials } from "../utils/format";
+import IntlTelInput from "@intl-tel-input/react";
+import "intl-tel-input/styles";
 
 const educationOptions = ["10th", "12th", "Diploma", "Bachelor", "Master", "PhD"];
 
@@ -57,6 +59,21 @@ function ChipInput({ label, value = [], onChange, placeholder }) {
   );
 }
 
+const validatePincodeVal = (val) => {
+  if (!val || !val.trim()) {
+    return "Postal code is required.";
+  }
+  const cleanVal = val.trim();
+  if (cleanVal.length < 1 || cleanVal.length > 15) {
+    return "Postal code must be between 1 and 15 characters.";
+  }
+  const postalCodeRegex = /^[a-zA-Z0-9\s-]+$/;
+  if (!postalCodeRegex.test(cleanVal)) {
+    return "Postal code can only contain letters, numbers, spaces, and hyphens.";
+  }
+  return "";
+};
+
 export default function Profile() {
   const { addToast } = useToast();
   const [user, setUser] = useState(null);
@@ -66,6 +83,10 @@ export default function Profile() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [changePasswordModalOpen, setChangePasswordModalOpen] = useState(false);
+  const phoneInputRef = useRef(null);
+  const [phoneError, setPhoneError] = useState("");
+  const [phoneTouched, setPhoneTouched] = useState(false);
+  const [pincodeError, setPincodeError] = useState("");
 
   // Memoized State List
   const states = useMemo(
@@ -110,6 +131,14 @@ export default function Profile() {
     loadProfile();
   }, [loadProfile]);
 
+  useEffect(() => {
+    if (!editing) {
+      setPhoneTouched(false);
+      setPhoneError("");
+      setPincodeError("");
+    }
+  }, [editing]);
+
   const completion = useMemo(() => {
     const data = user || {};
     const fields = [
@@ -135,8 +164,49 @@ export default function Profile() {
     }));
   };
 
+const getPhoneErrorMessage = (errorCode) => {
+  switch (errorCode) {
+    case 0:
+    case "INVALID_COUNTRY_CODE":
+      return "The country code is invalid.";
+    case 1:
+    case "TOO_SHORT":
+      return "The phone number is too short.";
+    case 2:
+    case "TOO_LONG":
+      return "The phone number is too long.";
+    case 3:
+    case "INVALID_LENGTH":
+      return "The phone number has an invalid length.";
+    default:
+      return "Please enter a valid phone number.";
+  }
+};
+
   const saveProfile = async (e) => {
     e.preventDefault();
+
+    // 1. Phone validation
+    if (formData.phone) {
+      const itiInstance = phoneInputRef.current?.getInstance();
+      if (itiInstance && !itiInstance.isValidNumber()) {
+        const errCode = itiInstance.getValidationError();
+        const msg = getPhoneErrorMessage(errCode);
+        addToast(msg, "error");
+        setPhoneError(msg);
+        setPhoneTouched(true);
+        return;
+      }
+    }
+
+    // 2. Pincode validation
+    const pError = validatePincodeVal(formData.pincode);
+    if (pError) {
+      addToast(pError, "error");
+      setPincodeError(pError);
+      return;
+    }
+
     setSaving(true);
     try {
       const payload = new FormData();
@@ -294,7 +364,68 @@ export default function Profile() {
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
               <Field label="Name *"><input className="input" value={formData.name || ""} onChange={(e) => updateField("name", e.target.value)} required /></Field>
               <Field label="Headline"><input className="input" value={formData.headline || ""} onChange={(e) => updateField("headline", e.target.value)} /></Field>
-              <Field label="Phone"><input className="input" value={formData.phone || ""} onChange={(e) => updateField("phone", e.target.value)} /></Field>
+              <Field label="Phone">
+                <IntlTelInput
+                  ref={phoneInputRef}
+                  value={formData.phone || ""}
+                  onChangeNumber={(val) => {
+                    updateField("phone", val);
+                    if (!val) {
+                      setPhoneError("");
+                    } else {
+                      const itiInstance = phoneInputRef.current?.getInstance();
+                      if (itiInstance) {
+                        const isValid = itiInstance.isValidNumber();
+                        if (isValid) {
+                          setPhoneError("");
+                        } else if (phoneTouched) {
+                          const errCode = itiInstance.getValidationError();
+                          setPhoneError(getPhoneErrorMessage(errCode));
+                        }
+                      }
+                    }
+                  }}
+                  initialCountry="in"
+                  loadUtils={() => import("intl-tel-input/utils")}
+                  containerClass="w-full"
+                  inputProps={{
+                    className: "input",
+                    placeholder: "Enter phone number",
+                    onBlur: () => {
+                      setPhoneTouched(true);
+                      const itiInstance = phoneInputRef.current?.getInstance();
+                      if (itiInstance && formData.phone) {
+                        const isValid = itiInstance.isValidNumber();
+                        if (!isValid) {
+                          const errCode = itiInstance.getValidationError();
+                          setPhoneError(getPhoneErrorMessage(errCode));
+                        } else {
+                          setPhoneError("");
+                        }
+                      }
+                    },
+                    onPaste: () => {
+                      setPhoneTouched(true);
+                      setTimeout(() => {
+                        const itiInstance = phoneInputRef.current?.getInstance();
+                        const currentVal = phoneInputRef.current?.getInput()?.value || "";
+                        if (itiInstance && currentVal) {
+                          const isValid = itiInstance.isValidNumber();
+                          if (!isValid) {
+                            const errCode = itiInstance.getValidationError();
+                            setPhoneError(getPhoneErrorMessage(errCode));
+                          } else {
+                            setPhoneError("");
+                          }
+                        }
+                      }, 50);
+                    }
+                  }}
+                />
+                {phoneError && formData.phone && (
+                  <p className="text-xs text-rose-600 mt-1 font-semibold">{phoneError}</p>
+                )}
+              </Field>
               <Field label="Date of birth *"><input type="date" className="input" value={formData.dob || ""} onChange={(e) => updateField("dob", e.target.value)} required /></Field>
               <Field label="State *">
                 <select className="input" value={formData.state || ""} onChange={(e) => updateField("state", e.target.value)} required>
@@ -308,20 +439,34 @@ export default function Profile() {
                   {selectedCities.map((city) => <option key={city}>{city}</option>)}
                 </select>
               </Field>
-              <Field label="Pincode *"><input className="input" value={formData.pincode || ""} onChange={(e) => updateField("pincode", e.target.value)} required /></Field>
+              <Field label="Pincode *">
+                <input
+                  className="input"
+                  value={formData.pincode || ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    updateField("pincode", val);
+                    setPincodeError(validatePincodeVal(val));
+                  }}
+                  required
+                />
+                {pincodeError && (
+                  <p className="text-xs text-rose-600 mt-1 font-semibold">{pincodeError}</p>
+                )}
+              </Field>
               <Field label="Education *">
                 <select className="input" value={formData.education || ""} onChange={(e) => updateField("education", e.target.value)} required>
                   <option value="">Select education</option>
                   {educationOptions.map((item) => <option key={item}>{item}</option>)}
                 </select>
               </Field>
-              <Field label="Specialization *"><ChipInput value={formData.specializationList || []} onChange={(value) => updateField("specializationList", value)} placeholder="Add specialization" /></Field>
+              <Field label="Specialization *"><ChipInput value={formData.specializationList || []} onChange={(value) => updateField("specializationList", value)} placeholder="Add specialization and press Enter" /></Field>
               <Field label="Experience level *"><input className="input" value={formData.experienceLevel || ""} onChange={(e) => updateField("experienceLevel", e.target.value)} /></Field>
               <Field label="Desired salary"><input type="number" className="input" value={formData.desiredSalary || ""} onChange={(e) => updateField("desiredSalary", e.target.value)} /></Field>
               <Field label="Portfolio"><ChipInput value={formData.portfolio || []} onChange={(value) => updateField("portfolio", value)} placeholder="Add portfolio link and press Enter" /></Field>
-              <Field label="Skills"><ChipInput value={formData.skills || []} onChange={(value) => updateField("skills", value)} placeholder="Add skill" /></Field>
-              <Field label="Preferred roles"><ChipInput value={formData.preferredRoles || []} onChange={(value) => updateField("preferredRoles", value)} placeholder="Add preferred role" /></Field>
-              <Field label="Languages"><ChipInput value={formData.languages || []} onChange={(value) => updateField("languages", value)} placeholder="Add language" /></Field>
+              <Field label="Skills"><ChipInput value={formData.skills || []} onChange={(value) => updateField("skills", value)} placeholder="Add skill and press Enter" /></Field>
+              <Field label="Preferred roles"><ChipInput value={formData.preferredRoles || []} onChange={(value) => updateField("preferredRoles", value)} placeholder="Add preferred role and press Enter" /></Field>
+              <Field label="Languages"><ChipInput value={formData.languages || []} onChange={(value) => updateField("languages", value)} placeholder="Add language and press Enter" /></Field>
               <Field label="Resume *">
                 <input
                   type="file"

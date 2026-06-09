@@ -183,9 +183,9 @@ router.put("/profile", authMiddleware, upload.single("resume"), async (req, res)
       updates.age = age;
     }
 
-    if (updates.pincode && !/^\d{6}$/.test(updates.pincode)) {
+    if (updates.pincode && !/^[a-zA-Z0-9\s-]{1,15}$/.test(updates.pincode)) {
       if (req.file) fs.unlinkSync(req.file.path);
-      return res.status(400).json({ message: "Pincode must be a 6-digit number" });
+      return res.status(400).json({ message: "Pincode must be 1-15 characters and contain only letters, numbers, spaces, or hyphens" });
     }
 
     ["skills", "languages", "preferredRoles"].forEach((field) => {

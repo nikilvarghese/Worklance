@@ -1,10 +1,31 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { BuildingOffice2Icon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import axios from "../utils/axios";
 import { useToast } from "../components/Toast";
 import DeleteAccountModal from "../components/DeleteAccountModal";
 import ChangePasswordModal from "../components/ChangePasswordModal";
 import { initials } from "../utils/format";
+import IntlTelInput from "@intl-tel-input/react";
+import "intl-tel-input/styles";
+
+const getPhoneErrorMessage = (errorCode) => {
+  switch (errorCode) {
+    case 0:
+    case "INVALID_COUNTRY_CODE":
+      return "The country code is invalid.";
+    case 1:
+    case "TOO_SHORT":
+      return "The phone number is too short.";
+    case 2:
+    case "TOO_LONG":
+      return "The phone number is too long.";
+    case 3:
+    case "INVALID_LENGTH":
+      return "The phone number has an invalid length.";
+    default:
+      return "Please enter a valid phone number.";
+  }
+};
 
 export default function HrProfile() {
   const { addToast } = useToast();
@@ -15,7 +36,10 @@ export default function HrProfile() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [changePasswordModalOpen, setChangePasswordModalOpen] = useState(false);
-const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState({});
+  const phoneInputRef = useRef(null);
+  const [phoneTouched, setPhoneTouched] = useState(false);
+
   const loadProfile = useCallback(async () => {
     try {
       const res = await axios.get("/auth/me");
@@ -29,6 +53,13 @@ const [errors, setErrors] = useState({});
   useEffect(() => {
     loadProfile();
   }, [loadProfile]);
+
+  useEffect(() => {
+    if (!editing) {
+      setPhoneTouched(false);
+      setErrors({});
+    }
+  }, [editing]);
 
   const deleteAccount = async (password) => {
     if (!password) return;
@@ -52,26 +83,29 @@ const [errors, setErrors] = useState({});
   };
 
   const validateForm = () => {
-  const newErrors = {};
+    const newErrors = {};
 
-  // 📞 Phone validation
-  if (form.phone) {
-    if (!/^\d{10}$/.test(form.phone)) {
-      newErrors.phone = "Phone must be exactly 10 digits";
+    // 📞 Phone validation
+    if (form.phone) {
+      const itiInstance = phoneInputRef.current?.getInstance();
+      if (itiInstance && !itiInstance.isValidNumber()) {
+        const errCode = itiInstance.getValidationError();
+        newErrors.phone = getPhoneErrorMessage(errCode);
+      }
     }
-  }
 
-  // 🌐 Website validation
-  if (form.website) {
-    const urlPattern = /^(https?:\/\/)[^\s$.?#].[^\s]*$/;
-    if (!urlPattern.test(form.website)) {
-      newErrors.website = "Enter a valid website link (https://...)";
+    // 🌐 Website validation
+    if (form.website) {
+      const urlPattern = /^(https?:\/\/)[^\s$.?#].[^\s]*$/;
+      if (!urlPattern.test(form.website)) {
+        newErrors.website = "Enter a valid website link (https://...)";
+      }
     }
-  }
 
-  setErrors(newErrors);
-  return Object.keys(newErrors).length === 0;
-};
+    setErrors(newErrors);
+    setPhoneTouched(true);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const saveProfile = async (e) => {
     e.preventDefault();
@@ -124,41 +158,14 @@ const [errors, setErrors] = useState({});
             <BuildingOffice2Icon className="h-8 w-8 text-indigo-600" />
             <div className="mt-5 space-y-4">
               <Info label="Email" value={profile.email} />
-              <input
-  type="tel"
-  className="input"
-  value={form.phone || ""}
-  onChange={(e) => {
-    const value = e.target.value.replace(/\D/g, ""); // remove non-digits
-    if (value.length <= 10) {
-      setForm({ ...form, phone: value });
-    }
-  }}
-  maxLength={10}
-  placeholder="10-digit phone number"
-  required
-/>
+              <Info label="Phone" value={profile.phone || "Not added"} />
               <Info label="Location" value={profile.location || "Not added"} />
-              <input
-  type="url"
-  className="input"
-  value={form.website || ""}
-  onChange={(e) => setForm({ ...form, website: e.target.value })}
-  placeholder="https://example.com"
-  pattern="https?://.*"
-/>
+              <Info label="Website" value={profile.website || "Not added"} />
             </div>
           </aside>
           <div className="space-y-5 p-6">
             <Info label="Industry" value={profile.industry || "Not added"} />
-            <input
-  type="number"
-  className="input"
-  value={form.teamSize || ""}
-  onChange={(e) => setForm({ ...form, teamSize: e.target.value })}
-  min={1}
-  placeholder="e.g. 50"
-/>
+            <Info label="Team size" value={profile.teamSize || "Not added"} />
             <div className="rounded-lg border border-slate-100 bg-white p-4">
               <p className="label">About</p>
               <p className="mt-2 text-sm leading-7 text-slate-600">{profile.about || "Add a company description to help candidates understand your team."}</p>
@@ -191,23 +198,68 @@ const [errors, setErrors] = useState({});
               <Field label="Name *"><input className="input" value={form.name || ""} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></Field>
               <Field label="Company *"><input className="input" value={form.company || ""} onChange={(e) => setForm({ ...form, company: e.target.value })} required /></Field>
               <Field label="Designation *"><input className="input" value={form.designation || ""} onChange={(e) => setForm({ ...form, designation: e.target.value })} required /></Field>
-             <Field label="Phone">
-  <input
-    type="tel"
-    className="input"
-    value={form.phone || ""}
-    onChange={(e) => {
-      const value = e.target.value.replace(/\D/g, "");
-      if (value.length <= 10) {
-        setForm({ ...form, phone: value });
-      }
-    }}
-    placeholder="10-digit phone number"
-  />
-  {errors.phone && (
-    <p className="text-sm text-rose-600 mt-1">{errors.phone}</p>
-  )}
-</Field>
+              <Field label="Phone">
+                <IntlTelInput
+                  ref={phoneInputRef}
+                  value={form.phone || ""}
+                  onChangeNumber={(val) => {
+                    setForm({ ...form, phone: val });
+                    if (!val) {
+                      setErrors((prev) => ({ ...prev, phone: "" }));
+                    } else {
+                      const itiInstance = phoneInputRef.current?.getInstance();
+                      if (itiInstance) {
+                        const isValid = itiInstance.isValidNumber();
+                        if (isValid) {
+                          setErrors((prev) => ({ ...prev, phone: "" }));
+                        } else if (phoneTouched) {
+                          const errCode = itiInstance.getValidationError();
+                          setErrors((prev) => ({ ...prev, phone: getPhoneErrorMessage(errCode) }));
+                        }
+                      }
+                    }
+                  }}
+                  initialCountry="in"
+                  loadUtils={() => import("intl-tel-input/utils")}
+                  containerClass="w-full"
+                  inputProps={{
+                    className: "input",
+                    placeholder: "Enter phone number",
+                    onBlur: () => {
+                      setPhoneTouched(true);
+                      const itiInstance = phoneInputRef.current?.getInstance();
+                      if (itiInstance && form.phone) {
+                        const isValid = itiInstance.isValidNumber();
+                        if (!isValid) {
+                          const errCode = itiInstance.getValidationError();
+                          setErrors((prev) => ({ ...prev, phone: getPhoneErrorMessage(errCode) }));
+                        } else {
+                          setErrors((prev) => ({ ...prev, phone: "" }));
+                        }
+                      }
+                    },
+                    onPaste: () => {
+                      setPhoneTouched(true);
+                      setTimeout(() => {
+                        const itiInstance = phoneInputRef.current?.getInstance();
+                        const currentVal = phoneInputRef.current?.getInput()?.value || "";
+                        if (itiInstance && currentVal) {
+                          const isValid = itiInstance.isValidNumber();
+                          if (!isValid) {
+                            const errCode = itiInstance.getValidationError();
+                            setErrors((prev) => ({ ...prev, phone: getPhoneErrorMessage(errCode) }));
+                          } else {
+                            setErrors((prev) => ({ ...prev, phone: "" }));
+                          }
+                        }
+                      }, 50);
+                    }
+                  }}
+                />
+                {errors.phone && (
+                  <p className="text-sm text-rose-600 mt-1">{errors.phone}</p>
+                )}
+              </Field>
               <Field label="Website">
   <input
     type="text"
