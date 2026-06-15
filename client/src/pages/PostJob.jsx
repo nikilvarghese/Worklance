@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { PaperAirplaneIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import { PaperAirplaneIcon, ExclamationTriangleIcon, FolderIcon, TrashIcon } from "@heroicons/react/24/outline";
 import axios from "../utils/axios";
 import { useEffect } from "react";
 import { useToast } from "../components/Toast";
@@ -35,31 +35,38 @@ export default function PostJob() {
   const [loading, setLoading] = useState(false);
   const [hrProfile, setHrProfile] = useState(null);
   const [showIncompleteModal, setShowIncompleteModal] = useState(false);
+  const [drafts, setDrafts] = useState([]);
+  const [showDrafts, setShowDrafts] = useState(false);
 
   useEffect(() => {
-    // Load draft if it exists and is less than 3 days old
-    const savedDraft = localStorage.getItem("jobDraft");
-    if (savedDraft) {
+    // Load drafts from localStorage and filter by age (less than 3 days)
+    const savedDrafts = JSON.parse(localStorage.getItem("jobDrafts") || "[]");
+
+    // Migrate old single draft if it exists
+    const legacyDraft = localStorage.getItem("jobDraft");
+    if (legacyDraft) {
       try {
-        const draftObj = JSON.parse(savedDraft);
-        if (new Date().getTime() - draftObj.timestamp < 3 * 24 * 60 * 60 * 1000) {
-          const loadedForm = draftObj.form || {};
-          setForm({
-            ...loadedForm,
-            skills: Array.isArray(loadedForm.skills)
-              ? loadedForm.skills
-              : (loadedForm.skills ? loadedForm.skills.split(",").map((s) => s.trim()).filter(Boolean) : []),
-            benefits: Array.isArray(loadedForm.benefits)
-              ? loadedForm.benefits
-              : (loadedForm.benefits ? loadedForm.benefits.split(",").map((s) => s.trim()).filter(Boolean) : []),
-          });
-        } else {
-          localStorage.removeItem("jobDraft");
+        const parsedLegacy = JSON.parse(legacyDraft);
+        if (parsedLegacy && parsedLegacy.form) {
+          const newDraft = {
+            id: `draft-${parsedLegacy.timestamp || Date.now()}`,
+            timestamp: parsedLegacy.timestamp || Date.now(),
+            title: parsedLegacy.form.title || "Legacy Draft",
+            form: parsedLegacy.form,
+          };
+          savedDrafts.unshift(newDraft);
         }
       } catch (e) {
-        console.error("Error parsing draft", e);
+        console.error("Error migrating legacy draft", e);
       }
+      localStorage.removeItem("jobDraft");
     }
+
+    const activeDrafts = savedDrafts.filter(
+      (d) => Date.now() - d.timestamp < 3 * 24 * 60 * 60 * 1000
+    );
+    setDrafts(activeDrafts);
+    localStorage.setItem("jobDrafts", JSON.stringify(activeDrafts));
 
     const fetchProfile = async () => {
       try {
@@ -100,12 +107,39 @@ export default function PostJob() {
   };
 
   const handleSaveDraft = () => {
-    const draftObj = {
-      timestamp: new Date().getTime(),
+    const newDraft = {
+      id: `draft-${Date.now()}`,
+      timestamp: Date.now(),
+      title: form.title || "Untitled Draft",
       form,
     };
-    localStorage.setItem("jobDraft", JSON.stringify(draftObj));
+    const updated = [newDraft, ...drafts];
+    setDrafts(updated);
+    localStorage.setItem("jobDrafts", JSON.stringify(updated));
     addToast("Draft saved successfully", "success");
+  };
+
+  const handleLoadDraft = (draft) => {
+    const loadedForm = draft.form || {};
+    setForm({
+      ...initialForm,
+      ...loadedForm,
+      skills: Array.isArray(loadedForm.skills)
+        ? loadedForm.skills
+        : (loadedForm.skills ? loadedForm.skills.split(",").map((s) => s.trim()).filter(Boolean) : []),
+      benefits: Array.isArray(loadedForm.benefits)
+        ? loadedForm.benefits
+        : (loadedForm.benefits ? loadedForm.benefits.split(",").map((s) => s.trim()).filter(Boolean) : []),
+    });
+    setShowDrafts(false);
+    addToast("Draft loaded successfully", "success");
+  };
+
+  const handleDeleteDraft = (id) => {
+    const updated = drafts.filter((d) => d.id !== id);
+    setDrafts(updated);
+    localStorage.setItem("jobDrafts", JSON.stringify(updated));
+    addToast("Draft deleted", "success");
   };
 
   const handleSubmit = async (e) => {
@@ -147,10 +181,53 @@ export default function PostJob() {
   return (
     <div className="page-wrap">
       <form onSubmit={handleSubmit} onKeyDown={handleFormKeyDown} className="panel overflow-hidden">
-        <div className="border-b border-slate-200 bg-white p-6">
-          <p className="label">New listing</p>
-          <h2 className="mt-1 text-2xl font-bold text-slate-950">Post a job</h2>
-          <p className="muted mt-2">Create a complete listing with compensation, skills, benefits, and work model.</p>
+        <div className="border-b border-slate-200 bg-white p-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+          <div>
+            <p className="label">New listing</p>
+            <h2 className="mt-1 text-2xl font-bold text-slate-950">Post a job</h2>
+            <p className="muted mt-2">Create a complete listing with compensation, skills, benefits, and work model.</p>
+          </div>
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowDrafts((prev) => !prev)}
+              className="btn-secondary flex items-center gap-2"
+            >
+              <FolderIcon className="h-4 w-4" />
+              Draft Folder ({drafts.length})
+            </button>
+
+            {showDrafts && (
+              <div className="absolute right-0 mt-2 z-10 w-80 rounded-xl border border-slate-200 bg-white p-3 shadow-lg">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Saved Drafts</p>
+                <div className="max-h-60 overflow-y-auto space-y-2">
+                  {drafts.length === 0 ? (
+                    <p className="text-sm text-slate-500 text-center py-4">No drafts saved</p>
+                  ) : (
+                    drafts.map((d) => (
+                      <div key={d.id} className="flex items-center justify-between gap-2 rounded-lg border border-slate-100 p-2 hover:bg-slate-50">
+                        <button
+                          type="button"
+                          onClick={() => handleLoadDraft(d)}
+                          className="flex-1 min-w-0 text-left"
+                        >
+                          <p className="truncate text-sm font-semibold text-slate-950">{d.title || "Untitled Draft"}</p>
+                          <p className="text-[10px] text-slate-400">{new Date(d.timestamp).toLocaleString("en-IN")}</p>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteDraft(d.id)}
+                          className="rounded-lg p-1 text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition"
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="grid gap-8 p-6 lg:grid-cols-[1fr_320px]">
