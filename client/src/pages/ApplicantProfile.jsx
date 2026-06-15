@@ -7,6 +7,7 @@ import {
   EnvelopeIcon,
   MapPinIcon,
   PhoneIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import axios from "../utils/axios";
 import { useToast } from "../components/Toast";
@@ -18,6 +19,13 @@ export default function ApplicantProfile() {
   const { addToast } = useToast();
   const [application, setApplication] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showInterviewModal, setShowInterviewModal] = useState(false);
+  const [interviewForm, setInterviewForm] = useState({
+    interviewDate: "",
+    interviewTime: "",
+    contactInfo: "",
+    description: "",
+  });
 
   const fetchApplicant = useCallback(async () => {
     setLoading(true);
@@ -36,9 +44,34 @@ export default function ApplicantProfile() {
     fetchApplicant();
   }, [fetchApplicant]);
 
-  const updateStatus = async (status) => {
+  const openInterview = () => {
+    setInterviewForm({
+      interviewDate: application?.interviewDate || "",
+      interviewTime: application?.interviewTime || "",
+      contactInfo: application?.contactInfo || "",
+      description: application?.description || "",
+    });
+    setShowInterviewModal(true);
+  };
+
+  const submitInterview = (e) => {
+    e.preventDefault();
+    const now = new Date();
+    const interviewDateTime = new Date(`${interviewForm.interviewDate}T${interviewForm.interviewTime}`);
+    const threeHoursFromNow = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+
+    if (interviewDateTime < threeHoursFromNow) {
+      addToast("Interview must be scheduled at least 3 hours in the future", "error");
+      return;
+    }
+
+    updateStatus("Interview", interviewForm);
+    setShowInterviewModal(false);
+  };
+
+  const updateStatus = async (status, extra = {}) => {
     try {
-      await axios.put(`/applications/${id}/status`, { status });
+      await axios.put(`/applications/${id}/status`, { status, ...extra });
       addToast(`Moved to ${status}`, "success");
       fetchApplicant();
     } catch (err) {
@@ -77,7 +110,13 @@ export default function ApplicantProfile() {
                 <button
                   key={status}
                   type="button"
-                  onClick={() => updateStatus(status)}
+                  onClick={() => {
+                    if (status === "Interview") {
+                      openInterview();
+                    } else {
+                      updateStatus(status);
+                    }
+                  }}
                   className={`rounded-lg px-3 py-2 text-sm font-semibold transition ${
                     application.status === status ? "bg-white text-slate-950" : "border border-white/15 bg-white/10 text-white hover:bg-white/15"
                   }`}
@@ -142,7 +181,42 @@ export default function ApplicantProfile() {
           </aside>
         </div>
       </section>
+
+      {showInterviewModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4">
+          <form onSubmit={submitInterview} className="w-full max-w-xl rounded-xl bg-white p-6 shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="label">Interview</p>
+                <h3 className="mt-1 text-xl font-bold text-slate-950">{applicant.name}</h3>
+              </div>
+              <button type="button" onClick={() => setShowInterviewModal(false)} className="rounded-lg p-2 text-slate-500 hover:bg-slate-100">
+                <XMarkIcon className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="mt-6 grid gap-4 sm:grid-cols-2">
+              <Field label="Date"><input type="date" className="input" value={interviewForm.interviewDate} onChange={(e) => setInterviewForm({ ...interviewForm, interviewDate: e.target.value })} min={new Date().toISOString().split('T')[0]} required /></Field>
+              <Field label="Time"><input type="time" className="input" value={interviewForm.interviewTime} onChange={(e) => setInterviewForm({ ...interviewForm, interviewTime: e.target.value })} required /></Field>
+              <Field label="Contact link or phone"><input className="input" value={interviewForm.contactInfo} onChange={(e) => setInterviewForm({ ...interviewForm, contactInfo: e.target.value })} /></Field>
+              <Field label="Notes"><input className="input" value={interviewForm.description} onChange={(e) => setInterviewForm({ ...interviewForm, description: e.target.value })} /></Field>
+            </div>
+            <div className="mt-6 flex justify-end gap-3">
+              <button type="button" onClick={() => setShowInterviewModal(false)} className="btn-secondary">Cancel</button>
+              <button type="submit" className="btn-primary">Schedule interview</button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
+  );
+}
+
+function Field({ label, children }) {
+  return (
+    <label className="block">
+      <span className="label mb-1 block">{label}</span>
+      {children}
+    </label>
   );
 }
 

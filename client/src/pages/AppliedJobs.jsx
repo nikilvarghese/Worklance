@@ -100,7 +100,13 @@ export default function AppliedJobs() {
                 <div className="mt-5 grid gap-3 border-t border-slate-100 pt-5 sm:grid-cols-3">
                   <Info label="Expected salary" value={application.expectedSalary ? `INR ${Number(application.expectedSalary).toLocaleString("en-IN")}` : "Not specified"} />
                   <Info label="Availability" value={application.availability || "Not specified"} />
-                  <Info label="Interview" value={application.interviewDate ? `${application.interviewDate} ${application.interviewTime || ""}` : "Not scheduled"} />
+                  <Info label="Interview Date & Time" value={application.interviewDate ? `${application.interviewDate} ${application.interviewTime || ""}` : "Not scheduled"} />
+                  {application.interviewDate && (
+                    <>
+                      <Info label="Interview Contact" value={application.contactInfo || "Not provided"} />
+                      <Info label="Interview Notes" value={application.description || "Not provided"} />
+                    </>
+                  )}
                 </div>
               </article>
             );

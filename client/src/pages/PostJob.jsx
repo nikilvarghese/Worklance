@@ -16,11 +16,11 @@ const initialForm = {
   jobType: "Full-time",
   experience: "1-3 years",
   education: "Bachelor's",
-  skills: "",
+  skills: [],
   openings: "1",
   workMode: "Hybrid",
   shift: "Day",
-  benefits: "",
+  benefits: [],
   department: "",
   category: "Engineering",
   urgentHiring: false,
@@ -43,7 +43,16 @@ export default function PostJob() {
       try {
         const draftObj = JSON.parse(savedDraft);
         if (new Date().getTime() - draftObj.timestamp < 3 * 24 * 60 * 60 * 1000) {
-          setForm(draftObj.form);
+          const loadedForm = draftObj.form || {};
+          setForm({
+            ...loadedForm,
+            skills: Array.isArray(loadedForm.skills)
+              ? loadedForm.skills
+              : (loadedForm.skills ? loadedForm.skills.split(",").map((s) => s.trim()).filter(Boolean) : []),
+            benefits: Array.isArray(loadedForm.benefits)
+              ? loadedForm.benefits
+              : (loadedForm.benefits ? loadedForm.benefits.split(",").map((s) => s.trim()).filter(Boolean) : []),
+          });
         } else {
           localStorage.removeItem("jobDraft");
         }
@@ -84,6 +93,12 @@ export default function PostJob() {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
+  const handleFormKeyDown = (e) => {
+    if (e.key === "Enter" && e.target.tagName === "INPUT" && e.target.type !== "submit") {
+      e.preventDefault();
+    }
+  };
+
   const handleSaveDraft = () => {
     const draftObj = {
       timestamp: new Date().getTime(),
@@ -98,6 +113,11 @@ export default function PostJob() {
     const salaryMin = Number(form.salaryMin || 0);
     const salaryMax = Number(form.salaryMax || salaryMin || 0);
 
+    if (salaryMin < 0 || salaryMax < 0) {
+      addToast("Salary values cannot be negative", "error");
+      return;
+    }
+
     if (salaryMax < salaryMin) {
       addToast("Max salary cannot be less than Min salary", "error");
       return;
@@ -105,8 +125,6 @@ export default function PostJob() {
 
     setLoading(true);
     try {
-      const salaryMin = Number(form.salaryMin || 0);
-      const salaryMax = Number(form.salaryMax || salaryMin || 0);
       await axios.post("/jobs", {
         ...form,
         salary: salaryMax || salaryMin,
@@ -128,7 +146,7 @@ export default function PostJob() {
 
   return (
     <div className="page-wrap">
-      <form onSubmit={handleSubmit} className="panel overflow-hidden">
+      <form onSubmit={handleSubmit} onKeyDown={handleFormKeyDown} className="panel overflow-hidden">
         <div className="border-b border-slate-200 bg-white p-6">
           <p className="label">New listing</p>
           <h2 className="mt-1 text-2xl font-bold text-slate-950">Post a job</h2>
@@ -158,12 +176,14 @@ export default function PostJob() {
 
             <Section title="Compensation and requirements">
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Min Monthly Salary"><input type="number" className="input" value={form.salaryMin} onChange={(e) => update("salaryMin", e.target.value)} required /></Field>
-                <Field label="Max Monthly Salary"><input type="number" className="input" value={form.salaryMax} onChange={(e) => update("salaryMax", e.target.value)} required /></Field>
+                <Field label="Min Monthly Salary"><input type="number" min="0" className="input" value={form.salaryMin} onChange={(e) => update("salaryMin", e.target.value)} required /></Field>
+                <Field label="Max Monthly Salary"><input type="number" min="0" className="input" value={form.salaryMax} onChange={(e) => update("salaryMax", e.target.value)} required /></Field>
                 <Field label="Experience"><select className="input" value={form.experience} onChange={(e) => update("experience", e.target.value)}>{["0-1 years", "1-3 years", "3-5 years", "5+ years"].map((item) => <option key={item}>{item}</option>)}</select></Field>
                 <Field label="Education"><select className="input" value={form.education} onChange={(e) => update("education", e.target.value)}>{["High School", "Bachelor's", "Master's", "PhD"].map((item) => <option key={item}>{item}</option>)}</select></Field>
-                <Field label="Skills"><input className="input" value={form.skills} onChange={(e) => update("skills", e.target.value)} placeholder="React, Node.js, SQL" /></Field>
-                <Field label="Benefits"><input className="input" value={form.benefits} onChange={(e) => update("benefits", e.target.value)} placeholder="Health insurance, ESOPs" /></Field>
+                <div className="sm:col-span-2 space-y-4">
+                  <ChipInput label="Skills" value={form.skills || []} onChange={(val) => update("skills", val)} placeholder="Add skill and press Enter" />
+                  <ChipInput label="Benefits" value={form.benefits || []} onChange={(val) => update("benefits", val)} placeholder="Add benefit and press Enter" />
+                </div>
               </div>
             </Section>
           </div>
@@ -265,6 +285,46 @@ function Field({ label, children }) {
     <label className="block">
       <span className="label mb-1 block">{label}</span>
       {children}
+    </label>
+  );
+}
+
+function ChipInput({ label, value = [], onChange, placeholder }) {
+  const [inputValue, setInputValue] = useState("");
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (inputValue.trim()) {
+        onChange([...value, inputValue.trim()]);
+        setInputValue("");
+      }
+    }
+  };
+
+  const removeChip = (index) => {
+    onChange(value.filter((_, i) => i !== index));
+  };
+
+  return (
+    <label className="block">
+      <span className="label mb-1 block">{label}</span>
+      <div className="flex flex-wrap gap-2 p-2 border border-slate-300 rounded-lg bg-white">
+        {value.map((chip, index) => (
+          <span key={index} className="inline-flex items-center gap-1 px-2 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm">
+            {chip}
+            <button type="button" onClick={() => removeChip(index)} className="text-indigo-600 hover:text-indigo-800">×</button>
+          </span>
+        ))}
+        <input
+          type="text"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder={placeholder}
+          className="flex-1 min-w-0 outline-none bg-transparent"
+        />
+      </div>
     </label>
   );
 }

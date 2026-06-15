@@ -42,6 +42,7 @@ export default function AppShell({ role, children }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [notifyOpen, setNotifyOpen] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   const navItems = role === "hr" ? hrNav : userNav;
   const roleLabel = role === "hr" ? "Employer workspace" : "Job seeker workspace";
@@ -50,6 +51,7 @@ export default function AppShell({ role, children }) {
     setMobileOpen(false);
     setProfileOpen(false);
     setNotifyOpen(false);
+    setShowClearConfirm(false);
   }, [location.pathname]);
 
   useEffect(() => {
@@ -62,10 +64,12 @@ export default function AppShell({ role, children }) {
 
         setProfile(profileRes.data);
         const items = Array.isArray(appRes.data) ? appRes.data : [];
+        const dismissed = JSON.parse(localStorage.getItem("dismissedNotifications") || "[]");
+        const activeItems = items.filter((item) => !dismissed.includes(item._id));
 
         if (role === "hr") {
           setNotifications(
-            items.slice(0, 6).map((item) => ({
+            activeItems.slice(0, 6).map((item) => ({
               id: item._id,
               title: item.userId?.name || "New applicant",
               body: `Applied for ${item.jobId?.title || "a job"}`,
@@ -74,7 +78,7 @@ export default function AppShell({ role, children }) {
           );
         } else {
           setNotifications(
-            items.slice(0, 6).map((item) => ({
+            activeItems.slice(0, 6).map((item) => ({
               id: item._id,
               title: item.jobId?.title || item.jobSnapshot?.title || "Application update",
               body: `Status: ${item.status}`,
@@ -103,6 +107,33 @@ export default function AppShell({ role, children }) {
   const logout = () => {
     localStorage.clear();
     navigate("/login");
+  };
+
+  const handleNotificationClick = (item) => {
+    const dismissed = JSON.parse(localStorage.getItem("dismissedNotifications") || "[]");
+    if (!dismissed.includes(item.id)) {
+      dismissed.push(item.id);
+      localStorage.setItem("dismissedNotifications", JSON.stringify(dismissed));
+    }
+    setNotifications((prev) => prev.filter((n) => n.id !== item.id));
+    setNotifyOpen(false);
+    if (role === "hr") {
+      navigate(`/hr/applicant/${item.id}`);
+    } else {
+      navigate("/applied");
+    }
+  };
+
+  const handleClearAll = () => {
+    const dismissed = JSON.parse(localStorage.getItem("dismissedNotifications") || "[]");
+    notifications.forEach((item) => {
+      if (!dismissed.includes(item.id)) {
+        dismissed.push(item.id);
+      }
+    });
+    localStorage.setItem("dismissedNotifications", JSON.stringify(dismissed));
+    setNotifications([]);
+    setShowClearConfirm(false);
   };
 
   return (
@@ -153,7 +184,14 @@ export default function AppShell({ role, children }) {
             <div className="relative">
               <button
                 type="button"
-                onClick={() => setNotifyOpen((value) => !value)}
+                onClick={() => {
+                  setNotifyOpen((value) => {
+                    if (value) {
+                      setShowClearConfirm(false);
+                    }
+                    return !value;
+                  });
+                }}
                 className="relative rounded-lg border border-slate-200 p-2 text-slate-700 transition hover:bg-slate-50"
                 aria-label="Open notifications"
               >
@@ -165,16 +203,48 @@ export default function AppShell({ role, children }) {
 
               {notifyOpen && (
                 <div className="absolute right-0 mt-3 w-80 rounded-lg border border-slate-200 bg-white p-2 shadow-soft">
-                  <div className="flex items-center justify-between px-2 py-2">
+                  <div className="flex items-center justify-between px-2 py-2 border-b border-slate-100 pb-2 mb-2">
                     <p className="font-semibold text-slate-950">Notifications</p>
-                    <span className="text-xs text-slate-500">{notifications.length} new</span>
+                    {notifications.length > 0 && !showClearConfirm && (
+                      <button
+                        type="button"
+                        onClick={() => setShowClearConfirm(true)}
+                        className="text-xs font-semibold text-rose-600 hover:text-rose-800 transition"
+                      >
+                        Clear All
+                      </button>
+                    )}
                   </div>
                   <div className="max-h-80 overflow-y-auto">
-                    {notifications.length === 0 ? (
+                    {showClearConfirm ? (
+                      <div className="p-3 bg-rose-50 border border-rose-100 rounded-lg my-1 text-center">
+                        <p className="text-xs font-medium text-rose-800">Clear all notifications?</p>
+                        <div className="mt-2 flex justify-center gap-3">
+                          <button
+                            type="button"
+                            onClick={handleClearAll}
+                            className="px-3 py-1 bg-rose-600 text-white rounded text-xs font-semibold hover:bg-rose-700 transition"
+                          >
+                            Yes
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setShowClearConfirm(false)}
+                            className="px-3 py-1 bg-white border border-slate-200 text-slate-700 rounded text-xs font-semibold hover:bg-slate-50 transition"
+                          >
+                            No
+                          </button>
+                        </div>
+                      </div>
+                    ) : notifications.length === 0 ? (
                       <p className="px-2 py-6 text-center text-sm text-slate-500">No updates yet</p>
                     ) : (
                       notifications.map((item) => (
-                        <div key={item.id} className="rounded-lg px-2 py-3 hover:bg-slate-50">
+                        <div
+                          key={item.id}
+                          onClick={() => handleNotificationClick(item)}
+                          className="rounded-lg px-2 py-3 hover:bg-slate-50 cursor-pointer"
+                        >
                           <div className="flex items-start justify-between gap-2">
                             <div>
                               <p className="text-sm font-semibold text-slate-900">{item.title}</p>
