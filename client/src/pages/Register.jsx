@@ -111,7 +111,7 @@ export default function Register() {
   const sendOtp = async () => {
     resetMessages();
     if (!validateEmail(form.email)) {
-      setMessage("Enter a valid Gmail address.");
+      setMessage("Enter a valid Email address.");
       setMessageType("error");
       return;
     }
