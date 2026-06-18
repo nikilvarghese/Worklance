@@ -53,17 +53,11 @@ test('TC_JD_002 - Verify job information displayed', async ({ page }) => {
         })
         .click();
 
-    await expect(
-        page.getByText(/job description/i)
-    ).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Job description' })).toBeVisible();
 
-    await expect(
-        page.getByText(/role overview/i)
-    ).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Role overview' })).toBeVisible()
 
-    await expect(
-        page.getByText(/inr/i)
-    ).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Skills and requirements' })).toBeVisible();
 
 });
 

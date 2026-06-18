@@ -134,6 +134,11 @@ test.describe('Post Job', () => {
 
     const maxSalaryInput = page.getByLabel(/max monthly salary/i);
 
+    await page.locator('label:has-text("Job title") input').fill('Automated Test Engineer');
+    await page.locator('label:has-text("Company") input').fill('Worklance Test Corp');
+    await page.locator('label:has-text("Location") input').fill('Bangalore, India');
+    await page.locator('textarea').fill('This is a test job description.');
+
     // Min salary validation
     await minSalaryInput.fill('-1000');
 

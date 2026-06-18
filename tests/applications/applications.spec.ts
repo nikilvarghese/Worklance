@@ -26,21 +26,38 @@ test.describe('Applications', () => {
     });
 
     test('TC_APP_002 - Verify applied job displayed', async ({ page }) => {
-        /*
-        Test Scenario: Verify applied job displayed
-        Steps: Apply for job (assumed already done, verify the presence of listings)
-        Expected Result: Applied job visible
-        */
-        const applicationsList = page.locator('article.panel');
-        // Either there are applications visible, or we show the empty state.
-        // If empty state, "No applications found" is visible.
-        const noApplications = page.getByText('No applications found');
-        if (await noApplications.isVisible()) {
-            await expect(noApplications).toBeVisible();
-        } else {
-            await expect(applicationsList.first()).toBeVisible();
-        }
-    });
+
+    const applications =
+        page.getByRole('article');
+
+    const noApplications =
+        page.getByText(/no applications found/i);
+
+    await Promise.race([
+        applications.first()
+            .waitFor({ state: 'visible' })
+            .catch(() => {}),
+
+        noApplications
+            .waitFor({ state: 'visible' })
+            .catch(() => {})
+    ]);
+
+    if (await noApplications.isVisible().catch(() => false)) {
+
+        await expect(
+            noApplications
+        ).toBeVisible();
+
+    } else {
+
+        await expect(
+            applications.first()
+        ).toBeVisible();
+
+    }
+
+});
 
     test('TC_APP_003 - Verify All filter', async ({ page }) => {
 
@@ -182,7 +199,7 @@ test.describe('Applications', () => {
         Steps: Click View Job
         Expected Result: Job details page opens
         */
-        const viewJobLink = page.getByRole('link', { name: /view job/i }).first();
+        const viewJobLink = page.getByRole('link', { name: 'View job' }).first()
         if (await viewJobLink.isVisible()) {
             await viewJobLink.click();
             await expect(page).toHaveURL(/\/job\/[a-f0-9]+/);
