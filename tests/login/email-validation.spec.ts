@@ -4,7 +4,7 @@ test.describe('Email Validation', () => {
 
     test('TC_LOGIN_003 - Job seeker email without @ symbol', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/login');
+        await page.goto('https://worklance-nu.vercel.app/login');
 
         await page.getByPlaceholder('Email')
             .fill('testgmail.com');
@@ -22,7 +22,7 @@ test.describe('Email Validation', () => {
 
     test('TC_LOGIN_004 - Job seeker email without domain', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/login');
+        await page.goto('https://worklance-nu.vercel.app/login');
 
         await page.getByPlaceholder('Email')
             .fill('test@');
@@ -40,7 +40,7 @@ test.describe('Email Validation', () => {
 
     test('TC_LOGIN_005 - Job seeker invalid email format', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/login');
+        await page.goto('https://worklance-nu.vercel.app/login');
 
         await page.getByPlaceholder('Email')
             .fill('abc');
@@ -58,7 +58,7 @@ test.describe('Email Validation', () => {
 
     test('TC_EMP_LOGIN_003 - Employer email without @ symbol', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/login');
+        await page.goto('https://worklance-nu.vercel.app/login');
 
         await page.getByText(/use employer login/i).click();
 
@@ -78,7 +78,7 @@ test.describe('Email Validation', () => {
 
     test('TC_EMP_LOGIN_004 - Employer email without domain', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/login');
+        await page.goto('https://worklance-nu.vercel.app/login');
 
         await page.getByText(/use employer login/i).click();
 
@@ -98,7 +98,7 @@ test.describe('Email Validation', () => {
 
     test('TC_EMP_LOGIN_005 - Employer invalid email format', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/login');
+        await page.goto('https://worklance-nu.vercel.app/login');
 
         await page.getByText(/use employer login/i).click();
 

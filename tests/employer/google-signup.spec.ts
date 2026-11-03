@@ -4,7 +4,7 @@ test.describe('Employer Google Signup', () => {
 
     test('TC_EMP_REG_031 - Google signup button is visible', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/register');
+        await page.goto('https://worklance-nu.vercel.app/register');
 
         await page.getByRole('button', {
             name: 'Employer'
@@ -20,7 +20,7 @@ test.describe('Employer Google Signup', () => {
 
     test('TC_EMP_REG_032 - Google signup redirects to Google login page', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/register');
+        await page.goto('https://worklance-nu.vercel.app/register');
 
         await page.getByRole('button', {
             name: 'Employer'

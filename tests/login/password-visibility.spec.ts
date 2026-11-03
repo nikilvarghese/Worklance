@@ -4,7 +4,7 @@ test.describe('Password Visibility', () => {
 
     test('TC_LOGIN_009 - Job seeker password visibility toggle', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/login');
+        await page.goto('https://worklance-nu.vercel.app/login');
 
         await page.getByPlaceholder('Password')
             .fill('Password123');
@@ -20,7 +20,7 @@ test.describe('Password Visibility', () => {
 
     test('TC_EMP_LOGIN_009 - Employer password visibility toggle', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/hr-login');
+        await page.goto('https://worklance-nu.vercel.app/hr-login');
 
         await page.getByPlaceholder('Password')
             .fill('Password123');

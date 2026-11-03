@@ -4,7 +4,7 @@ test.describe('Account Creation', () => {
 
     test('TC_JS_REG_024 - Create Account disabled when fields are empty', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/register');
+        await page.goto('https://worklance-nu.vercel.app/register');
 
         const createAccountButton =
             page.getByRole('button', { name: 'Create account' });
@@ -15,7 +15,7 @@ test.describe('Account Creation', () => {
 
     test.skip('TC_JS_REG_025 - Create Account enabled when fields are filled', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/register');
+        await page.goto('https://worklance-nu.vercel.app/register');
 
         await page.getByPlaceholder('First name').fill('Nikil');
         await page.getByPlaceholder('Last name').fill('Edwin');
@@ -34,7 +34,7 @@ test.describe('Account Creation', () => {
 
     test.skip('TC_JS_REG_026 - Successful registration', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/register');
+        await page.goto('https://worklance-nu.vercel.app/register');
 
         await page.getByPlaceholder('First name').fill('Nikil');
         await page.getByPlaceholder('Last name').fill('Edwin');
@@ -57,7 +57,7 @@ test.describe('Account Creation', () => {
 
     test('TC_JS_REG_028 - Duplicate email registration', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/register');
+        await page.goto('https://worklance-nu.vercel.app/register');
 
         await page.getByPlaceholder('First name').fill('Nikil');
         await page.getByPlaceholder('Last name').fill('Edwin');

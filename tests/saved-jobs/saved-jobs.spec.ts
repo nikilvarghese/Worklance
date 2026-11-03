@@ -4,7 +4,7 @@ test.describe('Saved Jobs', () => {
 
     test.beforeEach(async ({ page }) => {
         // Log in as a job seeker
-        await page.goto('http://localhost:3000/login');
+        await page.goto('https://worklance-nu.vercel.app/login');
         await page.getByPlaceholder('Email').fill(process.env.TESTUSER1_EMAIL!);
         await page.locator('input[type="password"]').fill(process.env.TESTUSER1_PASSWORD!);
         await page.getByRole('button', { name: /sign in as job seeker/i }).click();

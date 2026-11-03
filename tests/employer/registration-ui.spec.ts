@@ -4,7 +4,7 @@ test.describe('Employer Registration UI', () => {
 
     test('TC_EMP_REG_001 - Employer tab selected', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/register');
+        await page.goto('https://worklance-nu.vercel.app/register');
 
         await page.getByRole('button', {
             name: 'Employer'
@@ -26,7 +26,7 @@ test.describe('Employer Registration UI', () => {
 
     test('TC_EMP_REG_002 - Company Name field displayed', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/register');
+        await page.goto('https://worklance-nu.vercel.app/register');
 
         await page.getByRole('button', {
             name: 'Employer'
@@ -40,7 +40,7 @@ test.describe('Employer Registration UI', () => {
 
     test('TC_EMP_REG_003 - All mandatory fields displayed', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/register');
+        await page.goto('https://worklance-nu.vercel.app/register');
 
         await page.getByRole('button', {
             name: 'Employer'
@@ -70,7 +70,7 @@ test.describe('Employer Registration UI', () => {
 
     test('TC_EMP_REG_004 - Create Account disabled by default', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/register');
+        await page.goto('https://worklance-nu.vercel.app/register');
 
         await page.getByRole('button', {
             name: 'Employer'

@@ -4,7 +4,7 @@ test.describe.skip('OTP Flow', () => {
 
     test('TC_JS_REG_017 - Send OTP', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/register');
+        await page.goto('https://worklance-nu.vercel.app/register');
 
         await page.getByPlaceholder('First name').fill('Nikil');
         await page.getByPlaceholder('Last name').fill('Edwin');
@@ -26,7 +26,7 @@ test.describe.skip('OTP Flow', () => {
 
     test('TC_JS_REG_022 - Incorrect OTP', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/register');
+        await page.goto('https://worklance-nu.vercel.app/register');
 
         await page.getByPlaceholder('First name').fill('Nikil');
         await page.getByPlaceholder('Last name').fill('Edwin');

@@ -4,7 +4,7 @@ test.describe('Password Validation', () => {
 
     test('TC_JS_REG_012 - Password less than 8 characters', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/register');
+        await page.goto('https://worklance-nu.vercel.app/register');
 
         const passwordInput = page.locator('input[type="password"]');
 
@@ -18,7 +18,7 @@ test.describe('Password Validation', () => {
 
     test('TC_JS_REG_016 - Valid password format', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/register');
+        await page.goto('https://worklance-nu.vercel.app/register');
 
         const passwordInput = page.locator('input[type="password"]');
 

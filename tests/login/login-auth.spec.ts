@@ -5,7 +5,7 @@ test.describe('Login Authentication', () => {
 
     test('TC_LOGIN_006 - Job seeker successful login', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/login');
+        await page.goto('https://worklance-nu.vercel.app/login');
 
         await page.getByPlaceholder('Email')
             .fill(process.env.TESTUSER1_EMAIL!);
@@ -22,7 +22,7 @@ test.describe('Login Authentication', () => {
 
     test('TC_LOGIN_007 - Job seeker incorrect password', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/login');
+        await page.goto('https://worklance-nu.vercel.app/login');
 
         await page.getByPlaceholder('Email')
             .fill(process.env.TESTUSER1_EMAIL!);
@@ -41,7 +41,7 @@ test.describe('Login Authentication', () => {
 
     test('TC_LOGIN_008 - Job seeker unregistered account', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/login');
+        await page.goto('https://worklance-nu.vercel.app/login');
 
         await page.getByPlaceholder('Email')
             .fill('notregistered123@gmail.com');
@@ -60,7 +60,7 @@ test.describe('Login Authentication', () => {
 
     test('TC_EMP_LOGIN_006 - Employer successful login', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/login');
+        await page.goto('https://worklance-nu.vercel.app/login');
 
         await page.getByText(/use employer login/i).click();
 
@@ -79,7 +79,7 @@ test.describe('Login Authentication', () => {
 
     test('TC_EMP_LOGIN_007 - Employer incorrect password', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/login');
+        await page.goto('https://worklance-nu.vercel.app/login');
 
         await page.getByText(/use employer login/i).click();
 
@@ -100,7 +100,7 @@ test.describe('Login Authentication', () => {
 
     test('TC_EMP_LOGIN_008 - Employer unregistered account', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/login');
+        await page.goto('https://worklance-nu.vercel.app/login');
 
         await page.getByText(/use employer login/i).click();
 

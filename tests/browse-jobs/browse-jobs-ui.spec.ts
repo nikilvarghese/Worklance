@@ -4,7 +4,7 @@ test.describe('browse-jobs UI',()=> {
 
     test('TC_BJ_001 - Browse Jobs page loads successfully', async ({ page }) => {
 
-    await page.goto('http://localhost:3000/login');
+    await page.goto('https://worklance-nu.vercel.app/login');
 
     await page.getByPlaceholder(/email/i)
         .fill(process.env.TESTUSER1_EMAIL!);

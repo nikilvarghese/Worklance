@@ -4,7 +4,7 @@ test.describe('Email Validation', () => {
 
     test('TC_JS_REG_009 - Invalid email', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/register');
+        await page.goto('https://worklance-nu.vercel.app/register');
 
         await page.getByPlaceholder('First name').fill('Nikil');
         await page.getByPlaceholder('Last name').fill('Edwin');
@@ -22,7 +22,7 @@ test.describe('Email Validation', () => {
 
     test('TC_JS_REG_011 - Valid email accepted', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/register');
+        await page.goto('https://worklance-nu.vercel.app/register');
 
         await page.getByPlaceholder('First name').fill('Nikil');
         await page.getByPlaceholder('Last name').fill('Edwin');

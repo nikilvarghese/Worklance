@@ -4,7 +4,7 @@ test.describe.skip('Employer OTP Flow', () => {
 
     test('TC_EMP_REG_019 - Send OTP with valid details', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/register');
+        await page.goto('https://worklance-nu.vercel.app/register');
 
         await page.getByRole('button', {
             name: 'Employer'
@@ -37,7 +37,7 @@ test.describe.skip('Employer OTP Flow', () => {
 
     test('TC_EMP_REG_024 - Incorrect OTP', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/register');
+        await page.goto('https://worklance-nu.vercel.app/register');
 
         await page.getByRole('button', {
             name: 'Employer'

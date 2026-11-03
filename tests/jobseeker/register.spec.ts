@@ -4,7 +4,7 @@ test.describe('Registration UI', () => {
 
   test('TC_JS_REG_001 - Job Seeker tab selected', async ({ page }) => {
 
-    await page.goto('http://localhost:3000/register');
+    await page.goto('https://worklance-nu.vercel.app/register');
 
     const jobSeekerTab = page.getByRole('button', {
       name: 'Job seeker'
@@ -17,7 +17,7 @@ test.describe('Registration UI', () => {
   });
 
   test('TC_JS_REG_003 - Create Account disabled initially', async ({ page }) => {
-    await page.goto('http://localhost:3000/register');
+    await page.goto('https://worklance-nu.vercel.app/register');
 
     const createAccountButton = page.getByRole('button', {
       name: 'Create Account'

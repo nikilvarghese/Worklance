@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Login UI', () => {
 
     test('TC_LOGIN_001 - Job seeker login page elements displayed', async ({ page }) => {
-        await page.goto('http://localhost:3000/login');
+        await page.goto('https://worklance-nu.vercel.app/login');
 
         await expect(page.getByPlaceholder(/email/i)).toBeVisible();
         await expect(page.locator('input[type="password"]')).toBeVisible();
@@ -13,7 +13,7 @@ test.describe('Login UI', () => {
     });
 
     test('TC_EMP_LOGIN_001 - Employer login page elements displayed', async ({ page }) => {
-        await page.goto('http://localhost:3000/login');
+        await page.goto('https://worklance-nu.vercel.app/login');
 
         await page.getByText(/use employer login/i).click();
 

@@ -4,7 +4,7 @@ test.describe('Security - Reset Password', () => {
 
     test.beforeEach(async ({ page }) => {
 
-        await page.goto('http://localhost:3000/hr-login');
+        await page.goto('https://worklance-nu.vercel.app/hr-login');
 
         await page.getByPlaceholder('Work email')
             .fill(process.env.TESTUSER2_EMAIL!);

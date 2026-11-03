@@ -13,7 +13,7 @@ test.describe('Forgot Password Flow', () => {
 
         page = await browser.newPage();
 
-        await page.goto('http://localhost:3000/forgot-password');
+        await page.goto('https://worklance-nu.vercel.app/forgot-password');
 
         await page.getByPlaceholder(/email/i)
             .fill(process.env.TESTUSER1_EMAIL!);

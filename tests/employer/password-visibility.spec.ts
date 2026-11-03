@@ -4,7 +4,7 @@ test.describe('Employer Password Visibility', () => {
 
     test('TC_EMP_REG_029 - Verify password visibility toggle', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/register');
+        await page.goto('https://worklance-nu.vercel.app/register');
 
          await page.getByRole('button', { name: 'Employer' }).click();
   await page.getByRole('textbox', { name: '••••••••' }).click();

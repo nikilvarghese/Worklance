@@ -4,7 +4,7 @@ test.describe('Forgot Password UI', () => {
 
     test('TC_FP_001 - Forgot Password page navigation', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/login');
+        await page.goto('https://worklance-nu.vercel.app/login');
 
         await page.getByText(/forgot password/i).click();
 
@@ -14,7 +14,7 @@ test.describe('Forgot Password UI', () => {
 
     test('TC_FP_002 - Account not found message', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/forgot-password');
+        await page.goto('https://worklance-nu.vercel.app/forgot-password');
 
         await page.getByPlaceholder(/email/i)
             .fill('dtgjg@rfsd.bom');
@@ -31,7 +31,7 @@ test.describe('Forgot Password UI', () => {
 
     test('TC_FP_015 - Sign In link functionality', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/forgot-password');
+        await page.goto('https://worklance-nu.vercel.app/forgot-password');
 
         await page.getByText(/sign in/i).click();
 

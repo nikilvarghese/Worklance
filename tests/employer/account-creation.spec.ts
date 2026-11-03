@@ -4,7 +4,7 @@ test.describe('Employer Account Creation', () => {
 
     test('TC_EMP_REG_026 - Create Account disabled when fields are empty', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/register');
+        await page.goto('https://worklance-nu.vercel.app/register');
 
         await page.getByRole('button', {
             name: 'Employer'
@@ -21,7 +21,7 @@ test.describe('Employer Account Creation', () => {
 
     test.skip('TC_EMP_REG_027 - Create Account enabled when fields are filled', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/register');
+        await page.goto('https://worklance-nu.vercel.app/register');
 
         await page.getByRole('button', {
             name: 'Employer'
@@ -43,7 +43,7 @@ test.describe('Employer Account Creation', () => {
 
     test.skip('TC_EMP_REG_028 - Successful employer registration', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/register');
+        await page.goto('https://worklance-nu.vercel.app/register');
 
         await page.getByRole('button', {
             name: 'Employer'
@@ -68,7 +68,7 @@ test.describe('Employer Account Creation', () => {
 
     test('TC_EMP_REG_030 - Duplicate email registration', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/register');
+        await page.goto('https://worklance-nu.vercel.app/register');
 
         await page.getByRole('button', {
             name: 'Employer'

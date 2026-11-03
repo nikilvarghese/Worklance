@@ -5,7 +5,7 @@ test.describe('HR Profile', () => {
 
     test.beforeEach(async ({ page }) => {
         // Log in as employer
-        await page.goto('http://localhost:3000/hr-login');
+        await page.goto('https://worklance-nu.vercel.app/hr-login');
         await page.getByPlaceholder('Work email').fill(process.env.TESTUSER2_EMAIL!);
         await page.locator('input[type="password"]').fill(process.env.TESTUSER2_PASSWORD!);
         await page.getByRole('button', { name: /sign in as employer/i }).click();

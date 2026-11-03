@@ -4,7 +4,7 @@ test.describe('Employer Password Validation', () => {
 
     test('TC_EMP_REG_014 - Password less than 8 characters', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/register');
+        await page.goto('https://worklance-nu.vercel.app/register');
 
         await page.getByRole('button', { name: 'Employer' }).click();
 
@@ -19,7 +19,7 @@ test.describe('Employer Password Validation', () => {
 
     test('TC_EMP_REG_015 - Password without uppercase letter', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/register');
+        await page.goto('https://worklance-nu.vercel.app/register');
 
         await page.getByRole('button', { name: 'Employer' }).click();
 
@@ -34,7 +34,7 @@ test.describe('Employer Password Validation', () => {
 
     test('TC_EMP_REG_016 - Password without lowercase letter', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/register');
+        await page.goto('https://worklance-nu.vercel.app/register');
 
         await page.getByRole('button', { name: 'Employer' }).click();
 
@@ -49,7 +49,7 @@ test.describe('Employer Password Validation', () => {
 
     test('TC_EMP_REG_017 - Password without number', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/register');
+        await page.goto('https://worklance-nu.vercel.app/register');
 
         await page.getByRole('button', { name: 'Employer' }).click();
 
@@ -64,7 +64,7 @@ test.describe('Employer Password Validation', () => {
 
     test('TC_EMP_REG_018 - Valid password format', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/register');
+        await page.goto('https://worklance-nu.vercel.app/register');
 
         await page.getByRole('button', { name: 'Employer' }).click();
 

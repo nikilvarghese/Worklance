@@ -4,7 +4,7 @@ test.describe('Employer Email Validation', () => {
 
     test('TC_EMP_REG_011 - Invalid email format', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/register');
+        await page.goto('https://worklance-nu.vercel.app/register');
 
         await page.getByRole('button', { name: 'Employer' }).click();
 
@@ -30,7 +30,7 @@ test.describe('Employer Email Validation', () => {
 
     test('TC_EMP_REG_012 - Email without @ symbol', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/register');
+        await page.goto('https://worklance-nu.vercel.app/register');
 
         await page.getByRole('button', { name: 'Employer' }).click();
 
@@ -56,7 +56,7 @@ test.describe('Employer Email Validation', () => {
 
     test('TC_EMP_REG_013 - Valid email format accepted', async ({ page }) => {
 
-        await page.goto('http://localhost:3000/register');
+        await page.goto('https://worklance-nu.vercel.app/register');
 
         await page.getByRole('button', { name: 'Employer' }).click();
 

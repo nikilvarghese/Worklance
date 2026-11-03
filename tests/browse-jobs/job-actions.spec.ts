@@ -5,7 +5,7 @@ test.describe('Browse Jobs Actions', () => {
 
     test.beforeEach(async ({ page }) => {
 
-        await page.goto('http://localhost:3000/login');
+        await page.goto('https://worklance-nu.vercel.app/login');
 
         await page.getByPlaceholder(/email/i)
             .fill(process.env.TESTUSER1_EMAIL!);
