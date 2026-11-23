@@ -16,6 +16,7 @@ import {
 } from "@heroicons/react/24/outline";
 import axios from "../utils/axios";
 import { initials, statusStyles } from "../utils/format";
+import { WorklanceIcon } from "./Logo";
 
 const userNav = [
   { name: "Dashboard", path: "/dashboard", icon: HomeIcon },
@@ -313,9 +314,7 @@ function SidebarContent({ navItems, role, roleLabel }) {
     <>
       <div className="px-6 py-6">
         <Link to={role === "hr" ? "/hr-dashboard" : "/dashboard"} className="flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-white text-slate-950">
-            <BriefcaseIcon className="h-6 w-6" />
-          </span>
+          <WorklanceIcon className="h-10 w-10 shrink-0" variant="light" />
           <span>
             <span className="block text-lg font-bold">Worklance</span>
             <span className="block text-xs text-slate-400">{roleLabel}</span>

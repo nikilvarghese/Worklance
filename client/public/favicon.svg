@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Solid Background Badge -->
+  <rect width="100" height="100" rx="24" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1.5"/>
+
+  <g transform="translate(16, 17)">
+    <!-- Briefcase Handle -->
+    <path d="M26 14 C26 8.5 29.5 4.5 34 4.5 C38.5 4.5 42 8.5 42 14" stroke="#64748B" stroke-width="3.5" stroke-linecap="round"/>
+
+    <!-- Briefcase Top Part (Above diagonal cut) -->
+    <path d="M11 20 C11 16.5 13.8 14 17.5 14 H50.5 C54.2 14 57 16.5 57 20 V25 L11 41 Z" fill="#0F172A"/>
+
+    <!-- Briefcase Bottom Part (Below diagonal cut) -->
+    <path d="M11 48 L57 32 V48 C57 51.5 54.2 54 50.5 54 H17.5 C13.8 54 11 51.5 11 48 Z" fill="#0F172A"/>
+
+    <!-- Sharp Solid Lance (Arrow / Spear cutting diagonally from bottom-left to top-right) -->
+    <!-- Spear Shaft -->
+    <line x1="8" y1="52" x2="58" y2="18" stroke="#2563EB" stroke-width="4.5" stroke-linecap="round"/>
+    
+    <!-- Solid Arrowhead -->
+    <polygon points="66,13 52,17 57,23" fill="#2563EB"/>
+  </g>
+</svg>

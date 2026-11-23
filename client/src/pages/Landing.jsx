@@ -8,6 +8,7 @@ import {
   UsersIcon,
 } from "@heroicons/react/24/outline";
 import { jobCategories } from "../data/categories";
+import { WorklanceIcon } from "../components/Logo";
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -26,9 +27,7 @@ export default function Landing() {
     <div className="min-h-screen bg-slate-950 text-white">
       <header className="mx-auto flex max-w-7xl items-center justify-between px-4 py-5 sm:px-6 lg:px-8">
         <Link to="/" className="flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-white text-slate-950">
-            <BriefcaseIcon className="h-6 w-6" />
-          </span>
+          <WorklanceIcon className="h-10 w-10 shrink-0" variant="light" />
           <span className="text-lg font-bold">Worklance</span>
         </Link>
         <nav className="flex items-center gap-2">

@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { BriefcaseIcon, LockClosedIcon } from "@heroicons/react/24/outline";
 import axios from "../utils/axios";
 import PasswordInput from "../components/PasswordInput";
+import { WorklanceIcon } from "../components/Logo";
 
 export default function UserLogin() {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -103,9 +104,7 @@ export function AuthFrame({ eyebrow, title, summary, children }) {
       <div className="mx-auto grid min-h-screen max-w-7xl lg:grid-cols-[1fr_520px]">
         <section className="hidden flex-col justify-between px-10 py-10 text-white lg:flex">
           <Link to="/" className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-white text-slate-950">
-              <BriefcaseIcon className="h-6 w-6" />
-            </span>
+            <WorklanceIcon className="h-10 w-10 shrink-0" variant="light" />
             <span className="text-lg font-bold">Worklance</span>
           </Link>
           <div className="max-w-xl">
@@ -123,9 +122,7 @@ export function AuthFrame({ eyebrow, title, summary, children }) {
         <section className="flex items-center justify-center px-4 py-10 sm:px-6">
           <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-2xl sm:p-8">
             <Link to="/" className="mb-8 flex items-center gap-3 lg:hidden">
-              <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-950 text-white">
-                <BriefcaseIcon className="h-6 w-6" />
-              </span>
+              <WorklanceIcon className="h-10 w-10 shrink-0" variant="light" />
               <span className="text-lg font-bold text-slate-950">Worklance</span>
             </Link>
             {children}

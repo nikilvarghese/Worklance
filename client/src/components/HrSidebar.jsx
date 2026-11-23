@@ -13,6 +13,7 @@ import {
   ChevronRightIcon,
   ExclamationTriangleIcon
 } from "@heroicons/react/24/outline";
+import { WorklanceIcon } from "./Logo";
 
 export default function HrSidebar() {
   const navigate = useNavigate();
@@ -93,9 +94,7 @@ export default function HrSidebar() {
       {/* Header */}
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-            <BriefcaseIcon className="w-5 h-5 text-white" />
-          </div>
+          <WorklanceIcon className="w-8 h-8 shrink-0" variant="light" />
           <div>
             <h2 className="text-lg font-semibold text-gray-900">HR Portal</h2>
             <p className="text-sm text-gray-500">Manage your jobs</p>
