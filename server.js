@@ -44,6 +44,15 @@ app.use(
   })
 );
 
+// Health check
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "OK",
+    message: "Server is running",
+    timestamp: new Date().toISOString(),
+  });
+});
+
 app.get("/api", (req, res) => {
   res.send("Worklance API running");
 });
