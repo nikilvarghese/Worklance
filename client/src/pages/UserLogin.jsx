@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { BriefcaseIcon, LockClosedIcon } from "@heroicons/react/24/outline";
+import { LockClosedIcon } from "@heroicons/react/24/outline";
 import axios from "../utils/axios";
 import PasswordInput from "../components/PasswordInput";
 import { WorklanceIcon } from "../components/Logo";

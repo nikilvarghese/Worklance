@@ -1,7 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowRightIcon,
-  BriefcaseIcon,
   ChartBarIcon,
   CheckCircleIcon,
   SparklesIcon,
