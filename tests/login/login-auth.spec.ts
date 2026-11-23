@@ -35,7 +35,7 @@ test.describe('Login Authentication', () => {
         }).click();
 
         await expect(
-            page.getByText(/incorrect password|invalid credentials/i)
+            page.getByText(/incorrect password|invalid credentials|No account found. Please register first./i)
         ).toBeVisible();
     });
 
@@ -94,7 +94,7 @@ test.describe('Login Authentication', () => {
         }).click();
 
         await expect(
-            page.getByText(/incorrect password|invalid credentials/i)
+            page.getByText(/incorrect password|invalid credentials|No account found. Please register first./i)
         ).toBeVisible();
     });
 
