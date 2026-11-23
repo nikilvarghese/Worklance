@@ -111,14 +111,35 @@ export default function ForgotPassword() {
         {error && <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm font-medium text-rose-700">{error}</div>}
         {message && <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">{message}</div>}
 
-        <input
-          type="email"
-          placeholder="Email"
-          className="input"
-          value={form.email}
-          onChange={handleEmailChange}
-          required
-        />
+        <div className="space-y-1">
+          <input
+            type="email"
+            placeholder="Email"
+            className={`input ${stage === "verify" ? "bg-slate-100 text-slate-500 cursor-not-allowed border-slate-200" : ""}`}
+            value={form.email}
+            onChange={handleEmailChange}
+            disabled={stage === "verify"}
+            readOnly={stage === "verify"}
+            required
+          />
+          {stage === "verify" && (
+            <div className="flex items-center justify-between px-1 text-xs text-slate-500">
+              <span>Code sent to this email</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setStage("request");
+                  setForm((prev) => ({ ...prev, otp: "", password: "" }));
+                  setError("");
+                  setMessage("");
+                }}
+                className="font-semibold text-indigo-600 hover:text-indigo-800 transition"
+              >
+                Change email
+              </button>
+            </div>
+          )}
+        </div>
 
         {stage === "verify" && (
           <>
